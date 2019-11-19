@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">ProjetFinalAndroid</string>
+    <string name="oSession">Ouvrir une session</string>
+    <string name="fSession">Fin de la session</string>
+    <string name="kumiteMenu">Cliquer <u>ici</u> pour accéder à la salle de kumite (identifié)</string>
+    <string name="gradesMenu">Cliquer <u>ici</u> pour accéder au passage des grades (sensei ou vénérable)</string>
+    <string name="ecoleMenu">Cliquer &lt;u>ici&lt;/u> pour voir les membres de notre école</string>
+    <string name="votreMessage">Votre message :</string>
+    <string name="messagePublic">Envoyer message privé</string>
+    <string name="messagePrive">Envoyer message public</string>
+    <string name="reponses">Réponses</string>
+    <string name="loginTitre">Ouverture de session</string>
+    <string name="loginSousTitre">Veuillez vous identifier</string>
+    <string name="loginU">Utilisateur :</string>
+    <string name="loginM">Mot de passe :</string>
+    <string name="loginButton">Établir une session</string>
 </resources>

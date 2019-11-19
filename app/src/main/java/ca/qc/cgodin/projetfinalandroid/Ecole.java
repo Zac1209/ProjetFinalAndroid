@@ -1,0 +1,24 @@
+package ca.qc.cgodin.projetfinalandroid;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.Bundle;
+
+public class Ecole extends AppCompatActivity {
+
+
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_ecole);
+
+
+
+
+
+    }
+
+
+}
