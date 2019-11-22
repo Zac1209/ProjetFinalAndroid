@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
     <LinearLayout
@@ -11,9 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="start|center_vertical"
-        android:orientation="horizontal"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/avatar"
@@ -26,9 +25,17 @@
             android:id="@+id/userID"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
             android:layout_weight="1"
             android:text="TextView"
             android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/textView11"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text=", " />
 
         <TextView
             android:id="@+id/role"
@@ -42,6 +49,7 @@
             android:id="@+id/textView4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
             android:layout_weight="1"
             android:text=", ceinture"
             android:textSize="18sp" />
@@ -58,11 +66,9 @@
 
     <LinearLayout
         android:id="@+id/linearLayout2"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+        android:orientation="vertical">
 
         <Button
             android:id="@+id/button4"
@@ -76,17 +82,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="onClickLogout"
-            android:text="@string/fSession" />
+            android:text="@string/fSession"
+            android:visibility="gone" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/linearLayout3"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:orientation="vertical"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/lblEcole"
@@ -94,9 +99,9 @@
             android:layout_height="wrap_content"
             android:autoLink="all"
             android:linksClickable="false"
+            android:onClick="onClickEcole"
             android:selectAllOnFocus="false"
             android:text="@string/ecoleMenu"
-            android:onClick="onClickEcole"
             android:textSize="18sp" />
 
         <TextView
@@ -105,9 +110,9 @@
             android:layout_height="wrap_content"
             android:autoLink="all"
             android:linksClickable="false"
+            android:onClick="onClickKumite"
             android:selectAllOnFocus="false"
             android:text="@string/kumiteMenu"
-            android:onClick="onClickKumite"
             android:textSize="18sp" />
 
         <TextView
@@ -116,20 +121,18 @@
             android:layout_height="wrap_content"
             android:autoLink="all"
             android:linksClickable="false"
+            android:onClick="onClickGrades"
             android:selectAllOnFocus="false"
             android:text="@string/gradesMenu"
-            android:onClick="onClickGrades"
             android:textSize="18sp" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/linearLayout4"
         android:layout_width="wrap_content"
-        android:layout_height="155dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:orientation="vertical"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout3">
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/textView9"
@@ -150,19 +153,19 @@
             android:layout_height="wrap_content"
             android:text="@string/messagePublic" />
 
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/paneReponses"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
         <TextView
             android:id="@+id/textView10"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/reponses"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:text="Réponses" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/reponses"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout4" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
