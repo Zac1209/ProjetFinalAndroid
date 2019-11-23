@@ -1,10 +1,13 @@
 package ca.qc.cgodin.projetfinalandroid;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.LinearLayoutCompat;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.Image;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -22,7 +25,11 @@ import android.widget.Toast;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import ua.naiksoftware.stomp.Stomp;
 import ua.naiksoftware.stomp.client.StompClient;
@@ -37,7 +44,9 @@ public class MainActivity extends AppCompatActivity {
     TextView tvCeinture;
     Button btnLogout;
     LinearLayout responsePane;
+    Boolean isConnected = false;
 
+    @SuppressLint("CheckResult")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,13 +78,15 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-
         String username = "";
         String avatar = "";
         String fullname = "";
         String role = "";
         String ceinture = "";
         try {
+            isConnected = Boolean.parseBoolean(login.get("http://192.168.50.54:8100/isConnected",""));
+
+
             username = login.get("http://192.168.50.54:8100/getUsername","");
             avatar = login.get("http://192.168.50.54:8100/getAvatar","");
             fullname = login.get("http://192.168.50.54:8100/getFullname","");
@@ -97,21 +108,70 @@ public class MainActivity extends AppCompatActivity {
         mStompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, "ws://192.168.50.54:8100/webSocket/websocket");
         mStompClient.connect();
 
-        mStompClient.topic("/sujet/prive").subscribe(topicMessage -> {
 
-            TextView tv = new TextView(MainActivity.this);
-            tv.setText((new JSONObject(topicMessage.getPayload()).get("texte")).toString());
+        if(isConnected){
+            mStompClient.topic("/sujet/prive").subscribe(topicMessage -> {
+                TextView tvMessage = new TextView(MainActivity.this);
+                TextView tvDate = new TextView(MainActivity.this);
+
+                ImageView imgAvatar = new ImageView(MainActivity.this);
+                LinearLayout hbox = new LinearLayout(MainActivity.this);
+                hbox.setOrientation(LinearLayout.HORIZONTAL);
+                hbox.setLayoutParams(new LinearLayoutCompat.LayoutParams(LinearLayoutCompat.LayoutParams.MATCH_PARENT, LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
+                hbox.addView(imgAvatar,100,75);
+                hbox.addView(tvDate);
+                hbox.addView(tvMessage);
+
+
+                tvMessage.setText("prive" + ": " + (new JSONObject(topicMessage.getPayload()).get("texte")).toString());
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("EEEE dd MMMM y HH:mm:ss");
+                LocalDateTime now = LocalDateTime.now(ZoneId.of("America/Montreal"));
+                tvDate.setText(now.toString());
+
+                String strAvatarMessage = (new JSONObject(topicMessage.getPayload()).get("de")).toString();
+                strAvatarMessage = strAvatarMessage.replace("data:image/jpeg;base64,","");
+                strAvatarMessage = strAvatarMessage.replace("data:image/png;base64,","");
+                byte[] decodedString1 = Base64.decode(strAvatarMessage, Base64.DEFAULT);
+                Bitmap decodedByte1 = BitmapFactory.decodeByteArray(decodedString1, 0,decodedString1.length);
+                imgAvatar.setImageBitmap(decodedByte1);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        responsePane.addView(hbox);
+                    }
+                });
+            });
+        }
+        mStompClient.topic("/sujet/public").subscribe(topicMessage -> {
+            TextView tvMessage = new TextView(MainActivity.this);
+            TextView tvDate = new TextView(MainActivity.this);
+
+            ImageView imgAvatar = new ImageView(MainActivity.this);
+            LinearLayout hbox = new LinearLayout(MainActivity.this);
+            hbox.setOrientation(LinearLayout.HORIZONTAL);
+            hbox.setLayoutParams(new LinearLayoutCompat.LayoutParams(LinearLayoutCompat.LayoutParams.MATCH_PARENT, LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
+            hbox.addView(imgAvatar,100,75);
+            hbox.addView(tvDate);
+            hbox.addView(tvMessage);
+
+
+            tvMessage.setText("public" + ": " + (new JSONObject(topicMessage.getPayload()).get("texte")).toString());
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("EEEE dd MMMM y HH:mm:ss");
+            LocalDateTime now = LocalDateTime.now(ZoneId.of("America/Montreal"));
+            tvDate.setText(now.toString());
+
+            String strAvatarMessage = (new JSONObject(topicMessage.getPayload()).get("de")).toString();
+            strAvatarMessage = strAvatarMessage.replace("data:image/jpeg;base64,","");
+            strAvatarMessage = strAvatarMessage.replace("data:image/png;base64,","");
+            byte[] decodedString1 = Base64.decode(strAvatarMessage, Base64.DEFAULT);
+            Bitmap decodedByte1 = BitmapFactory.decodeByteArray(decodedString1, 0,decodedString1.length);
+            imgAvatar.setImageBitmap(decodedByte1);
             runOnUiThread(new Runnable() {
-
                 @Override
                 public void run() {
-
-                    responsePane.addView(tv);
-
+                    responsePane.addView(hbox);
                 }
             });
-
-
         });
     }
 
@@ -123,8 +183,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickKumite(View v) {
-        Intent myIntent = new Intent(v.getContext(), Kumite.class);
-        startActivity(myIntent);
+        if(isConnected) {
+            Intent myIntent = new Intent(v.getContext(), Kumite.class);
+            Bitmap bitmap = ((BitmapDrawable)avatarIMG.getDrawable()).getBitmap();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+            byte[] byteArray = byteArrayOutputStream .toByteArray();
+            String valeur = Base64.encodeToString(byteArray, Base64.DEFAULT);
+            myIntent.putExtra("valeur",valeur);
+            myIntent.putExtra("idCompte",tvUserID.getText().toString());
+            myIntent.putExtra("ceinture",tvCeinture.getText().toString());
+
+            startActivity(myIntent);
+        }
     }
 
     public void onClickGrades(View v) {

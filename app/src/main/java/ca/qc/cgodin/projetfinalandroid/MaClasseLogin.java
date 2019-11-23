@@ -140,6 +140,36 @@ public class MaClasseLogin {
         return responseData;
     }
 
+    String postGetCompteByAvatar(String url, String avatar) throws IOException {
+        RequestBody formBody = new FormBody.Builder()
+                .add("avatar", avatar)
+
+                .build();
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("cookie", "JSESSIONID=" + JSESSIONID )
+                .addHeader("rest","oui")
+                .addHeader("Content-Type", "application/x-www-form-urlencoded")
+                .post(formBody)
+
+                .build();
+
+        Response response = client.newCall(request).execute();
+        //Attention, on ne peut pas lire plus d'une fois la valeur de response.body().string()????
+        //Voilà pourquoi, j'utilise et retourne responseData.
+
+        final String responseData = response.body().string();
+        if (response.isSuccessful()) {
+            Log.d("STOMP", " post2()=" + responseData);
+
+        }
+        else {
+
+            Log.d("STOMP", " post2()=ERREUR");
+        }
+        return responseData;
+    }
+
     String get(String url, String json) throws IOException {
         Request request = new Request.Builder()
                 .url(url)

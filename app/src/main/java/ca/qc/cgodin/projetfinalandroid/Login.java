@@ -35,12 +35,5 @@ public class Login extends AppCompatActivity {
         /* TEST ET LOGIN */
 
     }
-    public void clicktest(View v) {
-        login.test();
 
-
-
-        /* TEST ET LOGIN */
-
-    }
 }
