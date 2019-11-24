@@ -4,7 +4,7 @@ import android.util.Log;
 import android.widget.TextView;
 
 import ua.naiksoftware.stomp.Stomp;
-import ua.naiksoftware.stomp.client.StompClient;
+import ua.naiksoftware.stomp.StompClient;
 
 
 

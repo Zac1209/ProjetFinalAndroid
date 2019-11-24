@@ -9,13 +9,11 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Base64;
-import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioButton;
@@ -23,19 +21,18 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Console;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import ua.naiksoftware.stomp.Stomp;
-import ua.naiksoftware.stomp.client.StompClient;
+import ua.naiksoftware.stomp.StompClient;
 
 public class Kumite extends AppCompatActivity {
     MaClasseLogin login = new MaClasseLogin();
@@ -45,11 +42,6 @@ public class Kumite extends AppCompatActivity {
     ArrayList<String> arbitres = new ArrayList<String>();
     ArrayList<String> combattants = new ArrayList<String>();//Ceux qui se battent
     HashMap<String,String> combattantsSavedPosition = new HashMap<>();
-    String avatarDefault;
-    String combatDefault;
-    String roche;
-    String papier;
-    String ciseau;
     int intCountRei = 0;
     String avatarLocal;
     ArrayList<String> resultCombat = new ArrayList<String>();
@@ -110,9 +102,13 @@ public class Kumite extends AppCompatActivity {
     StompClient mStompClient;
     RadioButton rbSpectateur;
     RadioButton rbCompetiteur;
+    RadioButton rbArbitre;
     ImageView avatarIMG;
     TextView tvNom;
     TextView tvCeinture;
+    Drawable avatarDefault;
+    Drawable combatDefault;
+    TextView hiddenID;
     @SuppressLint("CheckResult")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,17 +118,15 @@ public class Kumite extends AppCompatActivity {
 
         mStompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, "ws://192.168.50.54:8100/webSocket/websocket");
         mStompClient.connect();
-
+        avatarDefault = getDrawable(R.drawable.avatardefault);
+        combatDefault = getDrawable(R.drawable.combatdefault);
         avatarIMG = findViewById(R.id.avatar);
         tvNom = findViewById(R.id.userName);
         tvCeinture = findViewById(R.id.ceinture);
         rbSpectateur = findViewById(R.id.rbSpectateur);
         rbCompetiteur = findViewById(R.id.rbCompetiteur);
-        avatarDefault = new String(getString(R.string.avatarDefault));
-        combatDefault =  new String(getString(R.string.combatDefault));
-        roche = new String(getString(R.string.roche));
-        papier = new String(getString(R.string.papier));
-        ciseau = new String(getString(R.string.ciseau));
+        hiddenID = findViewById(R.id.hiddenID);
+        rbArbitre = findViewById(R.id.rbArbitre);
         spec1 = findViewById(R.id.spec1);
         spec2 = findViewById(R.id.spec2);
         spec3 = findViewById(R.id.spec3);
@@ -188,71 +182,105 @@ public class Kumite extends AppCompatActivity {
         String htmlString="Clicker <font color='#518aff'><u>ici</u></font> pour retourner au dojo\n";
         lblDojo.setText(Html.fromHtml(htmlString));
 
+        clearCombat();
+        clearSpecComp();
 
 
+        View.OnClickListener radio_listener = new View.OnClickListener (){
+            public void onClick(View v) {
+                //perform your action here
+                if(v==rbSpectateur){
+                    envoyerSpectateur(hiddenID.getText().toString());
+                }else if(v==rbCompetiteur){
+                    envoyerCompetiteur(hiddenID.getText().toString());
+                }else if(v==rbArbitre){
+                    envoyerArbitre(hiddenID.getText().toString());
+                }
+            }
+        };
+        rbSpectateur.setOnClickListener(radio_listener);
+        rbCompetiteur.setOnClickListener(radio_listener);
+        rbArbitre.setOnClickListener(radio_listener);
 
         mStompClient.topic("/sujet/positionUpdate").subscribe(topicMessage -> {
             String ajaxReponse = "";
             ajaxReponse = login.get("http://192.168.50.54:8100/getCompetiteurs","");
             competiteurs.clear();
             if(!ajaxReponse.equals("[]"))
-                competiteurs = new ArrayList<String>(Arrays.asList(ajaxReponse.replace("[","]").replace("]","").replace("data:image/jpeg;base64,","").split(",")));
+                competiteurs = new ArrayList<String>(Arrays.asList(ajaxReponse.replace("[","").replace("]","").replace("data:image/jpeg;base64,","").replace("\"","").split(",")));
 
             ajaxReponse = login.get("http://192.168.50.54:8100/getSpectateurs","");
             spectateurs.clear();
             if(!ajaxReponse.equals("[]"))
-                spectateurs = new ArrayList<String>(Arrays.asList(ajaxReponse.replace("[","]").replace("]","").replace("data:image/jpeg;base64,","").split(",")));
+                spectateurs = new ArrayList<String>(Arrays.asList(ajaxReponse.replace("[","").replace("]","").replace("data:image/jpeg;base64,","").replace("\"","").split(",")));
 
             ajaxReponse = login.get("http://192.168.50.54:8100/getArbitres","");
             arbitres.clear();
             if(!ajaxReponse.equals("[]"))
-                arbitres = new ArrayList<String>(Arrays.asList(ajaxReponse.replace("[","]").replace("]","").replace("data:image/jpeg;base64,","").split(",")));
+                arbitres = new ArrayList<String>(Arrays.asList(ajaxReponse.replace("[","").replace("]","").replace("data:image/jpeg;base64,","").replace("\"","").split(",")));
             afficherEstrade();
             String avatar;
             try{
-                avatar = (new JSONObject(topicMessage.getPayload()).get("avatar")).toString();
+                avatar = (new JSONObject(topicMessage.getPayload()).get("idUser")).toString();
+                if(!avatar.equals(""))
+                    avatar = login.get("http://192.168.50.54:8100/getAvatarById/" + avatar,"");
             }catch(Exception e){
                 avatar = "";
             }
+            avatar = avatar.replace("data:image/jpeg;base64,","");
             if(!avatar.equals("")) {
-                if (avatar == avatarLocal)
+                if (avatarLocal.contains(avatar))
                     commencerCombat();
             }
         });
         mStompClient.topic("/sujet/rei").subscribe(topicMessage -> {
             String avatar;
             try{
-                avatar = (new JSONObject(topicMessage.getPayload()).get("avatar")).toString();
+                avatar = (new JSONObject(topicMessage.getPayload()).get("idUser")).toString();
             }catch(Exception e){
                 avatar = "";
             }
             intCountRei++;
-            String position = combattantsSavedPosition.get(avatar);
+            avatar = login.get("http://192.168.50.54:8100/getAvatarById/"+avatar,"");
+            avatar = avatar.replace("data:image/jpeg;base64,","");
+            String position = "";
+            for (Map.Entry<String,String> entry : combattantsSavedPosition.entrySet()) {
+                if (Objects.equals(avatar, entry.getValue())) {
+                    position = entry.getKey();
+                    break;
+                }
+            }
             int id = getResources().getIdentifier("combatTxt" + position, "id", this.getBaseContext().getPackageName());
             TextView view = findViewById(id);
             view.setText("Rei!");
 
-            if(avatar.equals(avatarLocal))
+            if(avatarLocal.contains(avatar))
                 btnAction.setEnabled(false);
             if(intCountRei == 2){//Prêt à commencer
-                if(avatar == avatarLocal){
+                if(avatarLocal.contains(avatar)){
                     login.get("http://192.168.50.54:8100/saveCombatState/"+getCompteIdByAvatar(arbitreActuel)+"/"+getCompteIdByAvatar(combattants.get(0))+"/10/"+getCompteIdByAvatar(combattants.get(1))+"/2","");
-                    mStompClient.send("/sujet/updateCombat","");
+                    mStompClient.send("/sujet/updateCombat","").subscribe();
                 }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(avatarLocal.contains(arbitreActuel) || arbitreActuel.contains(avatarLocal)){//Afficher Hajime! pour l'arbitre
+                            btnAction.setText("Hajime!");
+                            btnAction.setVisibility(View.VISIBLE);
+                        }
+                        if(combattants.contains(avatarLocal))
+                            btnAction.setVisibility(View.INVISIBLE);
+                    }
+                });
 
-                if(avatarLocal.equals(arbitreActuel)){//Afficher Hajime! pour l'arbitre
-                    btnAction.setText("Hajime!");
-                    btnAction.setVisibility(View.VISIBLE);
-                }
-                if(combattants.contains(avatarLocal))
-                    btnAction.setVisibility(View.INVISIBLE);
             }
         });
 
         mStompClient.topic("/sujet/hajime").subscribe(topicMessage -> {
             String avatar;
             try{
-                avatar = (new JSONObject(topicMessage.getPayload()).get("avatar")).toString();
+                String userID = (new JSONObject(topicMessage.getPayload()).get("idUser")).toString();
+                avatar = login.get("http://192.168.50.54:8100/getAvatarById/" + userID,"");
             }catch(Exception e){
                 avatar = "";
             }
@@ -262,22 +290,35 @@ public class Kumite extends AppCompatActivity {
             setTimeout(() -> clearCombatText(), 2000);
 
             if(avatar.equals(avatarLocal)){
-                login.get("http://192.168.50.54:8100/saveCombatState/"+getCompteIdByAvatar(arbitreActuel)+"/"+getCompteIdByAvatar(combattants.get(0))+"/9/"+getCompteIdByAvatar(combattants.get(1))+"/3","");
-                mStompClient.send("/sujet/updateCombat","");
+                String compte1 = "";
+                String compte2 = "";
+                String compte3 = "";
+                compte1 = getCompteIdByAvatar("data:image/jpeg;base64," + arbitreActuel.replace("data:image/jpeg;base64,",""));
+                compte2 = getCompteIdByAvatar("data:image/jpeg;base64," + combattants.get(0).replace("data:image/jpeg;base64,",""));
+                compte3 = getCompteIdByAvatar("data:image/jpeg;base64," + combattants.get(1).replace("data:image/jpeg;base64,",""));
+                login.get("http://192.168.50.54:8100/saveCombatState/"+compte1+"/"+compte2+"/9/"+compte3+"/3","");
+                mStompClient.send("/sujet/updateCombat","").subscribe();
+                mStompClient.send("/sujet/positionUpdate","{\"avatar\":\"\",\"idUser\":\"\"}").subscribe();
             }
 
-            if(avatarLocal.equals(arbitreActuel)){
-                btnAction.setVisibility(View.INVISIBLE);
-            }else{
-                btnAction0.setVisibility(View.VISIBLE);
-                btnAction.setVisibility(View.VISIBLE);
-                btnAction1.setVisibility(View.VISIBLE);
-                btnAction.setText("Papier");
-                btnAction.setEnabled(true);
-            }
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if(avatarLocal.equals(arbitreActuel)){
+                        btnAction.setVisibility(View.INVISIBLE);
+                    }else{
+                        btnAction0.setVisibility(View.VISIBLE);
+                        btnAction.setVisibility(View.VISIBLE);
+                        btnAction1.setVisibility(View.VISIBLE);
+                        btnAction.setText("Papier");
+                        btnAction.setEnabled(true);
+                    }
+                }
+            });
+
         });
 
-        mStompClient.topic("/sujet/hajime").subscribe(topicMessage -> {
+        mStompClient.topic("/sujet/resultatCombat").subscribe(topicMessage -> {
             String avatar;
             String position;
             String result;
@@ -292,62 +333,88 @@ public class Kumite extends AppCompatActivity {
             }
 
             if(!position.equals("")) {
-                int id = getResources().getIdentifier("'#combat'" + position, "id", this.getBaseContext().getPackageName());
+                int id = getResources().getIdentifier("combat" + position, "id", this.getBaseContext().getPackageName());
                 ImageView view = findViewById(id);
-                byte[] decodedString1 = Base64.decode(roche, Base64.DEFAULT);
-                Bitmap rocheBIT = BitmapFactory.decodeByteArray(decodedString1, 0,decodedString1.length);
-                decodedString1 = Base64.decode(papier, Base64.DEFAULT);
-                Bitmap papierBIT = BitmapFactory.decodeByteArray(decodedString1, 0,decodedString1.length);
-                decodedString1 = Base64.decode(ciseau, Base64.DEFAULT);
-                Bitmap ciseauBIT = BitmapFactory.decodeByteArray(decodedString1, 0,decodedString1.length);
-                view.setImageBitmap(result.equals("Roche") ? rocheBIT : result.equals("Papier") ? papierBIT : ciseauBIT);
+
+                Drawable rocheD = getResources().getDrawable(R.drawable.roche);
+                Drawable papierD = getResources().getDrawable(R.drawable.papier);
+                Drawable ciseauD = getResources().getDrawable(R.drawable.ciseau);
+                String finalResult = result;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        view.setImageDrawable(finalResult.equals("Roche") ? rocheD : finalResult.equals("Papier") ? papierD : ciseauD);
+                    }
+                });
+
+
             }
             if(!avatar.equals("")) {
-                combatTxt6.setText("Ipon!");
-                btnAction.setVisibility(View.INVISIBLE);
-                btnAction0.setVisibility(View.INVISIBLE);
-                btnAction1.setVisibility(View.INVISIBLE);
-                btnAction.setText("Rei!");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        combatTxt6.setText("Ipon!");
+                        btnAction.setVisibility(View.INVISIBLE);
+                        btnAction0.setVisibility(View.INVISIBLE);
+                        btnAction1.setVisibility(View.INVISIBLE);
+                        btnAction.setText("Rei!");
+                    }
+                });
+
                 if (avatar.equals("egal")) {
-                    byte[] decodedString1 = Base64.decode(getString(R.string.drapeauVictoire), Base64.DEFAULT);
-                    Bitmap victoire = BitmapFactory.decodeByteArray(decodedString1, 0,decodedString1.length);
-                    combat7.setTag("victoire");
-                    combat7.setImageBitmap(victoire);
-                    combat5.setTag("victoire");
-                    combat5.setImageBitmap(victoire);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            combat7.setTag("victoire");
+                            combat7.setImageDrawable(getResources().getDrawable(R.drawable.drapeauvictoire));
+                            combat5.setTag("victoire");
+                            combat5.setImageDrawable(getResources().getDrawable(R.drawable.drapeauvictoire));
+                        }
+                    });
+
                 } else {
-                    int id = getResources().getIdentifier("'#combat'" + avatar, "id", this.getBaseContext().getPackageName());
+                    int id = getResources().getIdentifier("combat" + avatar, "id", this.getBaseContext().getPackageName());
                     ImageView view = findViewById(id);
-                    byte[] decodedString1 = Base64.decode(getString(R.string.drapeauVictoire), Base64.DEFAULT);
-                    Bitmap victoire = BitmapFactory.decodeByteArray(decodedString1, 0,decodedString1.length);
-                    view.setTag("victoire");
-                    view.setImageBitmap(victoire);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            view.setTag("victoire");
+                            view.setImageDrawable(getResources().getDrawable(R.drawable.drapeauvictoire));
+                        }
+                    });
+
                 }
                 if(avatarLocal.equals(arbitreActuel)){
-                    new AlertDialog.Builder(this)
-                            .setIcon(android.R.drawable.ic_dialog_alert)
-                            .setTitle("Rester arbitre")
-                            .setMessage("Rester arbitre?")
-                            .setPositiveButton("Yes", new DialogInterface.OnClickListener()
-                            {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    String ajaxResult = "";
-                                    try {
-                                        ajaxResult = login.get("http://192.168.50.54:8100/arbitreResterEnPlace/" + getCompteIdByAvatar(arbitreActuel),"");
-                                        if(ajaxResult.equals(arbitreActuel)){//Il reste
-                                            arbitreTemp = ajaxResult;
-                                        }else
-                                            arbitreTemp = "";
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            new AlertDialog.Builder(Kumite.this)
+                                    .setIcon(android.R.drawable.ic_dialog_alert)
+                                    .setTitle("Rester arbitre")
+                                    .setMessage("Rester arbitre?")
+                                    .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                                    {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            String ajaxResult = "";
+                                            try {
+                                                ajaxResult = login.get("http://192.168.50.54:8100/arbitreResterEnPlace/" + getCompteIdByAvatar(arbitreActuel),"");
+                                                if(ajaxResult.equals(arbitreActuel)){//Il reste
+                                                    arbitreTemp = ajaxResult;
+                                                }else
+                                                    arbitreTemp = "";
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            }
 
-                                }
+                                        }
 
-                            })
-                            .setNegativeButton("No", null)
-                            .show();
+                                    })
+                                    .setNegativeButton("No", null)
+                                    .show();
+                        }
+                    });
+
                 }
             }
         });
@@ -358,21 +425,34 @@ public class Kumite extends AppCompatActivity {
 
         mStompClient.topic("/sujet/resetCombat").subscribe(topicMessage -> {
             if(!avatarLocal.equals(arbitreActuel)){
-                group1.check(R.id.rbCompetiteur);
-                group1.setEnabled(true);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        group1.check(R.id.rbCompetiteur);
+                        group1.setEnabled(true);
+                    }
+                });
+
             }
             if(arbitreTemp.equals("")){//Reset d'arbitre
-                envoyerSpectateur(arbitreActuel,getCompteIdByAvatar(arbitreActuel));
+                envoyerSpectateur(getCompteIdByAvatar(arbitreActuel));
                 if(avatarLocal.equals(arbitreActuel)){
-                    group1.check(R.id.rbSpectateur);
-                    group1.setEnabled(true);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            group1.check(R.id.rbSpectateur);
+                            group1.setEnabled(true);
+                        }
+                    });
+
                 }
                 arbitreActuel = "";
                 arbitres = new ArrayList<>();
             }else
                 arbitreTemp = "";
-            envoyerCompetiteur(combattants.get(0),getCompteIdByAvatar(combattants.get(0)));
-            envoyerCompetiteur(combattants.get(1),getCompteIdByAvatar(combattants.get(1)));
+            envoyerCompetiteur(getCompteIdByAvatar(combattants.get(0)));
+            envoyerCompetiteur(getCompteIdByAvatar(combattants.get(1)));
+            intCountRei=0;
             combattants.clear();
             clearCombat();
             clearCombatText();
@@ -381,20 +461,36 @@ public class Kumite extends AppCompatActivity {
         String valeur = intent.getStringExtra("valeur");
         String idCompte = intent.getStringExtra("idCompte");
         String ceintureLive = intent.getStringExtra("ceinture");
-        envoyerSpectateur(valeur,idCompte);
+
         avatarLocal = valeur;
 
-        tvCeinture.setText(ceintureLive);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                tvCeinture.setText(ceintureLive);
+            }
+        });
+
         String username = "";
         try {
             username=login.get("http://192.168.50.54:8100/getUsername","");
         } catch (IOException e) {
             e.printStackTrace();
         }
-        tvNom.setText(username);
+
         byte[] decodedString1 = Base64.decode(valeur, Base64.DEFAULT);
         Bitmap decodedByte1 = BitmapFactory.decodeByteArray(decodedString1, 0,decodedString1.length);
-        avatarIMG.setImageBitmap(decodedByte1);
+        String finalUsername = username;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                tvNom.setText(finalUsername);
+                avatarIMG.setImageBitmap(decodedByte1);
+                hiddenID.setText(idCompte);
+            }
+        });
+
+        envoyerSpectateur(idCompte);
     }
 
 
@@ -458,12 +554,11 @@ public class Kumite extends AppCompatActivity {
         for(int i =1;i<=12;i++){
             int id = getResources().getIdentifier("spec" + i, "id", this.getBaseContext().getPackageName());
             final ImageView view = findViewById(id);
-            byte[] decodedString1 = Base64.decode(avatarDefault, Base64.DEFAULT);
-            Bitmap decodedByte1 = BitmapFactory.decodeByteArray(decodedString1, 0,decodedString1.length);
+
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    view.setImageBitmap(decodedByte1);
+                    view.setImageDrawable(avatarDefault);
                     view.setTag("vide");
                 }
             });
@@ -474,7 +569,7 @@ public class Kumite extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    view2.setImageBitmap(decodedByte1);
+                    view2.setImageDrawable(getResources().getDrawable(R.drawable.avatardefault));
                     view2.setTag("vide");
                 }
             });
@@ -486,12 +581,10 @@ public class Kumite extends AppCompatActivity {
         for(int i =1;i<=11;i++){
             int id = getResources().getIdentifier("combat" + i, "id", this.getBaseContext().getPackageName());
             ImageView view = findViewById(id);
-            byte[] decodedString1 = Base64.decode(avatarDefault, Base64.DEFAULT);
-            Bitmap decodedByte1 = BitmapFactory.decodeByteArray(decodedString1, 0,decodedString1.length);
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    view.setImageBitmap(decodedByte1);
+                    view.setImageDrawable(combatDefault);
                     view.setTag("vide");
                 }
             });
@@ -500,7 +593,7 @@ public class Kumite extends AppCompatActivity {
     }
     private void clearCombatText(){
         for(int i =1;i<=11;i++){
-            int id = getResources().getIdentifier("'combatTxt'" + i, "id", this.getBaseContext().getPackageName());
+            int id = getResources().getIdentifier("combatTxt" + i, "id", this.getBaseContext().getPackageName());
             TextView view = findViewById(id);
             runOnUiThread(new Runnable() {
                 @Override
@@ -512,11 +605,23 @@ public class Kumite extends AppCompatActivity {
         }
     }
 
-    private void actionClick(String avatar){
-        String btnActionValue = btnAction.getTag().toString();
+    public void btnActionClick(View v){
+        actionClick(hiddenID.getText().toString());
+    }
+
+    public void btnRocheClick(View v){
+        envoyerResultCombat("","Roche");
+    }
+
+    public void btnPCiseaulick(View v){
+        envoyerResultCombat("","Ciseau");
+    }
+
+    private void actionClick(String userID){
+        String btnActionValue = btnAction.getText().toString();
         switch(btnActionValue){
             case "Rei!":
-                envoyerRei(avatar);
+                envoyerRei(userID);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -526,11 +631,11 @@ public class Kumite extends AppCompatActivity {
 
                 break;
             case "Hajime!":
-                envoyerHajime(avatar);
+                envoyerHajime(userID);
 
                 break;
             default:
-                envoyerResultCombat(avatar,"Papier");
+                envoyerResultCombat(userID,"Papier");
 
         }
     }
@@ -544,7 +649,7 @@ public class Kumite extends AppCompatActivity {
             keyList = new ArrayList<>(combattantsSavedPosition.keySet());
         for(int i = 0;i<keyList.size();i++){
             String key = keyList.get(i);
-            int id = getResources().getIdentifier("'combat'" + i, "id", this.getBaseContext().getPackageName());
+            int id = getResources().getIdentifier("combat" + key, "id", this.getBaseContext().getPackageName());
             ImageView view = findViewById(id);
             byte[] decodedString1 = Base64.decode(combattantsSavedPosition.get(key), Base64.DEFAULT);
             Bitmap decodedByte1 = BitmapFactory.decodeByteArray(decodedString1, 0,decodedString1.length);
@@ -557,7 +662,7 @@ public class Kumite extends AppCompatActivity {
 
         }
 
-        byte[] decodedString1 = Base64.decode(arbitreActuel, Base64.DEFAULT);
+        byte[] decodedString1 = Base64.decode(arbitreActuel.replace("data:image/jpeg;base64,",""), Base64.DEFAULT);
         Bitmap decodedByte1 = BitmapFactory.decodeByteArray(decodedString1, 0,decodedString1.length);
         runOnUiThread(new Runnable() {
             @Override
@@ -567,7 +672,7 @@ public class Kumite extends AppCompatActivity {
         });
 
 
-        if(avatarLocal != arbitreActuel){
+        if(!avatarLocal.contains(arbitreActuel) && !arbitreActuel.contains(avatarLocal)){
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -588,18 +693,29 @@ public class Kumite extends AppCompatActivity {
                 }
             });
 
+            if(combattants.size() != 0){
+                combattants.set(0,competiteurs.get(0));
+                combattants.set(1,competiteurs.get(1));
+            }else{
+                combattants.add(competiteurs.get(0));
+                combattants.add(competiteurs.get(1));
+            }
 
-            combattants.set(0,competiteurs.get(0));
-            combattants.set(1,competiteurs.get(1));
 
+            String compte1 = "";
+            String compte2 = "";
+            String compte3 = "";
             try {
-                login.get("http://192.168.50.54:8100/saveCombatState/"+getCompteIdByAvatar(arbitres.get(0))+"/"+getCompteIdByAvatar(combattants.get(0))+"/11/"+getCompteIdByAvatar(combattants.get(1))+"/1","");
+                compte1 = getCompteIdByAvatar("data:image/jpeg;base64," + arbitres.get(0).replace("data:image/jpeg;base64,",""));
+                compte2 = getCompteIdByAvatar("data:image/jpeg;base64," + combattants.get(0).replace("data:image/jpeg;base64,",""));
+                compte3 = getCompteIdByAvatar("data:image/jpeg;base64," + combattants.get(1).replace("data:image/jpeg;base64,",""));
+                login.get("http://192.168.50.54:8100/saveCombatState/"+compte1+"/"+compte2+"/11/"+compte3+"/1","");
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            mStompClient.send("/sujet/updateCombat");
-            mStompClient.send("/sujet/positionUpdate","{\"avatar\":\"null\",\"idUser\":\"null\"}");
+            mStompClient.send("/sujet/updateCombat","{}").subscribe();
+            mStompClient.send("/sujet/positionUpdate","{\"avatar\":\"\",\"idUser\":\"\"}").subscribe();
         }
 
     }
@@ -607,7 +723,7 @@ public class Kumite extends AppCompatActivity {
     private String getCompteIdByAvatar(String avatar){
         String returnString = "";
         try {
-            returnString = login.postGetCompteByAvatar("http://192.168.50.54:8100/saveCombatState",avatar);
+            returnString = login.postGetCompteByAvatar("http://192.168.50.54:8100/getCompteByAvatar",avatar);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -615,39 +731,41 @@ public class Kumite extends AppCompatActivity {
         return returnString;
     }
 
-    private void envoyerSpectateur(String valeur, String id) {
+    private void envoyerSpectateur(String id) {
         try {
             login.get("http://192.168.50.54:8100/saveSpectateur/" + id,"");
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-        mStompClient.send("/sujet/positionUpdate","{\"avatar\":\""+valeur+"\",\"idUser\":\""+id+"\"}");
+
+        mStompClient.send("/sujet/positionUpdate","{\"idUser\":\""+id+"\"}").subscribe();
     }
 
-    private void envoyerCompetiteur(String valeur,String id) {
+    private void envoyerCompetiteur(String id) {
         try {
             login.get("http://192.168.50.54:8100/saveCompetiteur/" + id,"");
         } catch (IOException e) {
             e.printStackTrace();
         }
-        mStompClient.send("/sujet/positionUpdate","{\"avatar\":\""+valeur+"\",\"idUser\":\""+id+"\"}");
+        mStompClient.send("/sujet/positionUpdate","{\"idUser\":\""+id+"\"}").subscribe();
     }
 
-    private void envoyerArbitre(String valeur, String id) {
+    private void envoyerArbitre(String id) {
         try {
             login.get("http://192.168.50.54:8100/saveArbitre/" + id,"");
         } catch (IOException e) {
             e.printStackTrace();
         }
-        mStompClient.send("/sujet/positionUpdate","{\"avatar\":\""+valeur+"\",\"idUser\":\""+id+"\"}");
+        mStompClient.send("/sujet/positionUpdate","{\"idUser\":\""+id+"\"}").subscribe();
     }
 
     private void envoyerRei(String valeur) {
-        mStompClient.send("/sujet/rei","{\"avatar\":\""+valeur+"\"}");
+        mStompClient.send("/sujet/rei","{\"idUser\":\""+valeur+"\"}").subscribe();
     }
 
     private void envoyerHajime(String valeur) {
-        mStompClient.send("/sujet/hajime","{\"avatar\":\""+valeur+"\"}");
+        mStompClient.send("/sujet/hajime","{\"idUser\":\""+valeur+"\"}").subscribe();
     }
 
     private void envoyerResultCombat(String valeur,String result) {
@@ -657,7 +775,7 @@ public class Kumite extends AppCompatActivity {
         byte[] byteArray = byteArrayOutputStream .toByteArray();
         String combat3SRCString = Base64.encodeToString(byteArray, Base64.DEFAULT);
 
-        int position = combat3SRCString == avatarLocal ? 4 : 8;
+        int position = combat3SRCString.equals(avatarLocal) ? 4 : 8;
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -670,12 +788,13 @@ public class Kumite extends AppCompatActivity {
 
         String resultToSend = "";
         String ajaxResult = "";
+        String compteId;
         try {
-            ajaxResult = login.get("http://192.168.50.54:8100/saveCombatResult/"+ getCompteIdByAvatar(avatarLocal) + "/" + result,"");
+            ajaxResult = login.get("http://192.168.50.54:8100/saveCombatResult/" + hiddenID.getText().toString() + "/" + result,"");
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if(ajaxResult != ""){
+        if(!ajaxResult.equals("")){
             resultToSend = ajaxResult;
             runOnUiThread(new Runnable() {
                 @Override
@@ -687,7 +806,7 @@ public class Kumite extends AppCompatActivity {
             });
 
         }
-        mStompClient.send("/sujet/resultatCombat","{\"avatar\":\""+resultToSend+"\",\"position\":\""+position+"\",\"'result'\":\""+result+"\"}");
+        mStompClient.send("/sujet/resultatCombat","{\"avatar\":\""+resultToSend+"\",\"position\":\""+position+"\",\"result\":\""+result+"\"}").subscribe();
     }
 
     private void updateCombat(){
@@ -698,8 +817,8 @@ public class Kumite extends AppCompatActivity {
             e.printStackTrace();
         }
         Map<String, Integer> myMap = new HashMap<String, Integer>();
-        String[] pairs = ajaxReturn.split(",");
-        for (int i=0;i<pairs.length;i++) {
+        String[] pairs = ajaxReturn.replace("[","").replace("\"","").replace("]","").replace("{","").replace("}","").replace("data:image/jpeg;base64,","").split(",");
+        for (int i=0;i<pairs.length && pairs.length==2;i++) {
             String pair = pairs[i];
             String[] keyValue = pair.split(":");
             myMap.put(keyValue[0], Integer.valueOf(keyValue[1]));
@@ -710,7 +829,10 @@ public class Kumite extends AppCompatActivity {
         combattantsSavedPosition = new HashMap();
         for(int i = 0;i<keyList.size();i++){
             combattantsSavedPosition.put(myMap.get(keyList.get(i)).toString(),keyList.get(i));
-            combattants.set(i,keyList.get(i));
+            if(combattants.size() == 2){
+                combattants.set(i,keyList.get(i));
+            }else
+                combattants.add(keyList.get(i));
         }
 
         try {

@@ -21,6 +21,16 @@ android {
         sourceCompatibility = 1.8
         targetCompatibility = 1.8
     }
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/ASL2.0'
+    }
 
 }
 
@@ -31,10 +41,12 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    implementation 'com.squareup.okhttp3:okhttp:3.8.0'
-    implementation 'com.github.NaikSoftware:StompProtocolAndroid:1.5.4'
-    implementation 'org.java-websocket:Java-WebSocket:1.3.0'
+    implementation 'com.github.NaikSoftware:StompProtocolAndroid:1.6.4'
+    implementation 'org.java-websocket:Java-WebSocket:1.4.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.2.2'
     implementation group: 'io.reactivex.rxjava2', name: 'rxandroid', version: '2.1.0'
     // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
+    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.10'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
 
 }

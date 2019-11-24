@@ -47,7 +47,7 @@ public class MaClasseLogin {
 //https://github.com/square/okhttp/wiki/Recipes
         Log.d("STOMP", "terminerConnexion()");
         String json = "";
-        String url = "http://10.0.2.2:8100/logout";
+        String url = "http://192.168.50.54:8100/logout";
         try {
             postLogin(url ,json,user, pass);
         } catch (IOException e) {
@@ -142,15 +142,17 @@ public class MaClasseLogin {
 
     String postGetCompteByAvatar(String url, String avatar) throws IOException {
         RequestBody formBody = new FormBody.Builder()
-                .add("avatar", avatar)
+                .addEncoded("avatar", avatar)
 
                 .build();
+        RequestBody tes = RequestBody.create(MediaType.get("application/octet-stream"),avatar.getBytes());
+
         Request request = new Request.Builder()
                 .url(url)
                 .addHeader("cookie", "JSESSIONID=" + JSESSIONID )
                 .addHeader("rest","oui")
-                .addHeader("Content-Type", "application/x-www-form-urlencoded")
-                .post(formBody)
+                .addHeader("Content-Type", "text/plain")
+                .post(tes)
 
                 .build();
 

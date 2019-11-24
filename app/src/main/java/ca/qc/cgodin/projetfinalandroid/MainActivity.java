@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.media.Image;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.text.Html;
@@ -16,14 +15,11 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -32,7 +28,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 import ua.naiksoftware.stomp.Stomp;
-import ua.naiksoftware.stomp.client.StompClient;
+import ua.naiksoftware.stomp.StompClient;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,19 +39,22 @@ public class MainActivity extends AppCompatActivity {
     TextView tvRole;
     TextView tvCeinture;
     Button btnLogout;
+    Button btnLogin;
     LinearLayout responsePane;
     Boolean isConnected = false;
-
+    TextView hiddenID;
     @SuppressLint("CheckResult")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dojo);
         avatarIMG = findViewById(R.id.avatar);
-        tvUserID = findViewById(R.id.userID);
+        tvUserID = findViewById(R.id.userName);
         tvRole = findViewById(R.id.role);
+        hiddenID = findViewById(R.id.hiddenID);
         tvCeinture = findViewById(R.id.ceinture);
         btnLogout = findViewById(R.id.logout);
+        btnLogin = findViewById(R.id.login);
         responsePane = findViewById(R.id.paneReponses);
         if (android.os.Build.VERSION.SDK_INT > 9) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -95,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        hiddenID.setText(username);
         avatar = avatar.replace("data:image/jpeg;base64,","");
         avatar = avatar.replace("data:image/png;base64,","");
         byte[] decodedString = Base64.decode(avatar, Base64.DEFAULT);
@@ -141,6 +141,11 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
             });
+            btnLogin.setVisibility(View.GONE);
+            btnLogout.setVisibility(View.VISIBLE);
+        }else{
+            btnLogin.setVisibility(View.VISIBLE);
+            btnLogout.setVisibility(View.GONE);
         }
         mStompClient.topic("/sujet/public").subscribe(topicMessage -> {
             TextView tvMessage = new TextView(MainActivity.this);
@@ -182,16 +187,13 @@ public class MainActivity extends AppCompatActivity {
         startActivity(myIntent);
     }
 
-    public void onClickKumite(View v) {
+    public void onClickKumite(View v) throws IOException {
         if(isConnected) {
             Intent myIntent = new Intent(v.getContext(), Kumite.class);
-            Bitmap bitmap = ((BitmapDrawable)avatarIMG.getDrawable()).getBitmap();
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-            byte[] byteArray = byteArrayOutputStream .toByteArray();
-            String valeur = Base64.encodeToString(byteArray, Base64.DEFAULT);
+
+            String valeur = login.get("http://192.168.50.54:8100/getAvatarById/" + hiddenID.getText().toString(),"");
             myIntent.putExtra("valeur",valeur);
-            myIntent.putExtra("idCompte",tvUserID.getText().toString());
+            myIntent.putExtra("idCompte",hiddenID.getText().toString());
             myIntent.putExtra("ceinture",tvCeinture.getText().toString());
 
             startActivity(myIntent);
@@ -209,7 +211,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickLogout(View v) {
-
-
+        login.terminerConnexion(hiddenID.getText().toString(),"Patate123");
+        finish();
+        overridePendingTransition(0, 0);
+        startActivity(getIntent());
+        overridePendingTransition(0, 0);
     }
 }
