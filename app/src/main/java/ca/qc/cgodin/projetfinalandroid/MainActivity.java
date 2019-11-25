@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONObject;
 
@@ -83,14 +84,14 @@ public class MainActivity extends AppCompatActivity {
         String role = "";
         String ceinture = "";
         try {
-            isConnected = Boolean.parseBoolean(login.get("http://192.168.50.54:8100/isConnected",""));
+            isConnected = Boolean.parseBoolean(login.get("http://10.0.2.2:8100/isConnected",""));
 
 
-            username = login.get("http://192.168.50.54:8100/getUsername","");
-            avatar = login.get("http://192.168.50.54:8100/getAvatar","");
-            fullname = login.get("http://192.168.50.54:8100/getFullname","");
-            role = login.get("http://192.168.50.54:8100/getRole","");
-            ceinture = login.get("http://192.168.50.54:8100/getCeinture","");
+            username = login.get("http://10.0.2.2:8100/getUsername","");
+            avatar = login.get("http://10.0.2.2:8100/getAvatar","");
+            fullname = login.get("http://10.0.2.2:8100/getFullname","");
+            role = login.get("http://10.0.2.2:8100/getRole","");
+            ceinture = login.get("http://10.0.2.2:8100/getCeinture","");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -105,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
         tvCeinture.setText(ceinture);
 
         StompClient mStompClient;
-        mStompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, "ws://192.168.50.54:8100/webSocket/websocket");
+        mStompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, "ws://10.0.2.2:8100/webSocket/websocket");
         mStompClient.connect();
 
 
@@ -182,16 +183,23 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    public void onClickEcole(View v) {
+    public void onClickEcole(View v) throws IOException {
+
         Intent myIntent = new Intent(v.getContext(), Ecole.class);
         startActivity(myIntent);
+
+
     }
 
     public void onClickKumite(View v) throws IOException {
-        if(isConnected) {
+        String response = login.get("http://10.0.2.2:8100/kumite","");
+        if(response.equals("Unauthorized")){
+            Toast.makeText(this.getApplicationContext(), "Non authorizé",
+                    Toast.LENGTH_LONG).show();
+        }else{
             Intent myIntent = new Intent(v.getContext(), Kumite.class);
 
-            String valeur = login.get("http://192.168.50.54:8100/getAvatarById/" + hiddenID.getText().toString(),"");
+            String valeur = login.get("http://10.0.2.2:8100/getAvatarById/" + hiddenID.getText().toString(),"");
             myIntent.putExtra("valeur",valeur);
             myIntent.putExtra("idCompte",hiddenID.getText().toString());
             myIntent.putExtra("ceinture",tvCeinture.getText().toString());
@@ -200,9 +208,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void onClickGrades(View v) {
-        Intent myIntent = new Intent(v.getContext(), Grades.class);
-        startActivity(myIntent);
+    public void onClickGrades(View v) throws IOException {
+        String response = login.get("http://10.0.2.2:8100/passageDeGrades","");
+        if(response.equals("Unauthorized")){
+            Toast.makeText(this.getApplicationContext(), "Non authorizé",
+                    Toast.LENGTH_LONG).show();
+        }else{
+            Intent myIntent = new Intent(v.getContext(), Grades.class);
+            startActivity(myIntent);
+        }
+
     }
 
     public void onClickLogin(View v) {

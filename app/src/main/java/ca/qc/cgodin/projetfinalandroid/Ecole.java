@@ -5,8 +5,10 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -61,7 +63,7 @@ public class Ecole extends AppCompatActivity {
 
         String ajaxReturn = "";
         try {
-            ajaxReturn = login.get("http://192.168.50.54:8100/getVenerable","");
+            ajaxReturn = login.get("http://10.0.2.2:8100/getVenerable","");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -72,7 +74,7 @@ public class Ecole extends AppCompatActivity {
 
         ajaxReturn = "";
         try {
-            ajaxReturn = login.get("http://192.168.50.54:8100/getHonte","");
+            ajaxReturn = login.get("http://10.0.2.2:8100/getHonte","");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -86,7 +88,7 @@ public class Ecole extends AppCompatActivity {
 
         ajaxReturn = "";
         try {
-            ajaxReturn = login.get("http://192.168.50.54:8100/getProf","");
+            ajaxReturn = login.get("http://10.0.2.2:8100/getProf","");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -100,7 +102,7 @@ public class Ecole extends AppCompatActivity {
 
         ajaxReturn = "";
         try {
-            ajaxReturn = login.get("http://192.168.50.54:8100/getAncien","");
+            ajaxReturn = login.get("http://10.0.2.2:8100/getAncien","");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -114,7 +116,7 @@ public class Ecole extends AppCompatActivity {
 
         ajaxReturn = "";
         try {
-            ajaxReturn = login.get("http://192.168.50.54:8100/getNouveau","");
+            ajaxReturn = login.get("http://10.0.2.2:8100/getNouveau","");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -151,6 +153,11 @@ public class Ecole extends AppCompatActivity {
         CompteAdapter adapter4 = new CompteAdapter(lstNouveau,getApplicationContext());
         nouveau.setAdapter(adapter4);
 
+    }
+
+    public void clickDojo(View v){
+        Intent intent = new Intent(Ecole.this,MainActivity.class);
+        startActivity(intent);
     }
 
 

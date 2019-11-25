@@ -122,5 +122,6 @@
         android:id="@+id/lblDojo2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:onClick="clickDojo"
         android:text="TextView" />
 </LinearLayout>

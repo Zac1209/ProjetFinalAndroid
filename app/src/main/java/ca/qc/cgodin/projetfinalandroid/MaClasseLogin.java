@@ -2,6 +2,9 @@ package ca.qc.cgodin.projetfinalandroid;
 
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 
 import okhttp3.FormBody;
@@ -30,7 +33,7 @@ public class MaClasseLogin {
         pass = pass1;
         Log.d("STOMP", "etablirConnexion()");
         String json = "";
-        String url = "http://192.168.50.54:8100/login";
+        String url = "http://10.0.2.2:8100/login";
         try {
             postLogin(url ,json,user, pass);
         } catch (IOException e) {
@@ -47,7 +50,7 @@ public class MaClasseLogin {
 //https://github.com/square/okhttp/wiki/Recipes
         Log.d("STOMP", "terminerConnexion()");
         String json = "";
-        String url = "http://192.168.50.54:8100/logout";
+        String url = "http://10.0.2.2:8100/logout";
         try {
             postLogin(url ,json,user, pass);
         } catch (IOException e) {
@@ -62,7 +65,7 @@ public class MaClasseLogin {
 //https://square.github.io/okhttp/
         //Log.d("STOMP", "dateHeure()");
         String json = "";
-        String url = "http://192.168.50.54:8100/test";
+        String url = "http://10.0.2.2:8100/test";
         try {
             postLogin(url ,json,null,null);
         } catch (IOException e) {
@@ -191,8 +194,21 @@ public class MaClasseLogin {
 
         }
         else {
-            responseData = "";
-            Log.d("STOMP", " get()=ERREUR");
+            try {
+                String response1 = (new JSONObject(responseData)).getString("error");
+                if(response1.equals("Unauthorized")){
+                    responseData= "Unauthorized";
+                }else{
+                    responseData = "";
+                    Log.d("STOMP", " get()=ERREUR");
+                }
+
+            } catch (JSONException e) {
+                responseData = "";
+                Log.d("STOMP", " get()=ERREUR");
+                e.printStackTrace();
+            }
+
         }
         return responseData;
     }
