@@ -482,8 +482,6 @@ public class Kumite extends AppCompatActivity {
                     btnAction.setText("Rei!");
                 }
             });
-            envoyerCompetiteur(getCompteIdByAvatar(combattants.get(0)));
-            envoyerCompetiteur(getCompteIdByAvatar(combattants.get(1)));
             intCountRei=0;
             combattants.clear();
             clearCombat();
