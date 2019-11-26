@@ -45,7 +45,7 @@ public class Login extends AppCompatActivity {
         }
         LinearLayoutManager layoutManager = new LinearLayoutManager(Login.this);
         recUser.setLayoutManager(layoutManager);
-        adapter = new CompteAdapter(lstUser,getApplicationContext());
+        adapter = new CompteAdapter(lstUser,getApplicationContext(),true);
         recUser.setAdapter(adapter);
     }
 

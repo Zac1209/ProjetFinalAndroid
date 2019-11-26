@@ -12,7 +12,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="@android:dimen/notification_large_icon_width"
+        android:layout_weight="0.5"
+        android:gravity="bottom"
         android:text="@string/loginTitre"
         android:textSize="30sp" />
 
@@ -21,24 +22,24 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="@android:dimen/notification_large_icon_height"
+        android:layout_weight="0.5"
         android:text="@string/loginSousTitre"
         android:textSize="24sp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/lstUser"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="0dp"
         android:layout_gravity="center"
         android:layout_marginHorizontal="100dp"
-        android:layout_marginTop="100px" />
+        android:layout_weight="2" />
 
     <LinearLayout
         android:id="@+id/linearLayout6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="30dp"
+        android:layout_weight="0.2"
         android:orientation="horizontal">
 
         <TextView
@@ -60,9 +61,10 @@
     <Button
         android:id="@+id/button"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_gravity="center"
-        android:layout_marginTop="50dp"
+        android:layout_marginBottom="30dp"
+        android:layout_weight="0.3"
         android:onClick="onClick"
         android:text="@string/loginButton" />
 

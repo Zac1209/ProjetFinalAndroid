@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,7 +46,11 @@ public class MainActivity extends AppCompatActivity {
     Boolean isConnected = false;
     TextView tvCredit;
     TextView tvPoint;
+    StompClient mStompClient;
     TextView hiddenID;
+    Button btnMsgPrive;
+    Button btnMsgPublic;
+    LinearLayout tvMessage;
     @SuppressLint("CheckResult")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +62,9 @@ public class MainActivity extends AppCompatActivity {
         hiddenID = findViewById(R.id.hiddenID);
         tvCeinture = findViewById(R.id.ceinture);
         tvCredit = findViewById(R.id.tvCredit);
+        btnMsgPrive = findViewById(R.id.btnMessagePrive);
+        btnMsgPublic = findViewById(R.id.btnMessagePublic);
+        tvMessage = findViewById(R.id.tvMessage);
         tvPoint = findViewById(R.id.tvPoint);
         btnLogout = findViewById(R.id.logout);
         btnLogin = findViewById(R.id.login);
@@ -65,6 +73,9 @@ public class MainActivity extends AppCompatActivity {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
+
+        mStompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, "ws://192.168.50.54:8100/webSocket/websocket");
+        mStompClient.connect();
 
         //pour get la text bleu et souligné
         TextView lblEcole = findViewById(R.id.lblEcole);
@@ -121,6 +132,11 @@ public class MainActivity extends AppCompatActivity {
 
 
         if(isConnected){
+            btnMsgPrive.setVisibility(View.VISIBLE);
+            tvMessage.setVisibility(View.VISIBLE);
+            if(!role.equals("NOUVEAU")){
+                btnMsgPublic.setVisibility(View.VISIBLE);
+            }
             mStompClient.topic("/sujet/prive").subscribe(topicMessage -> {
                 TextView tvMessage = new TextView(MainActivity.this);
                 TextView tvDate = new TextView(MainActivity.this);
@@ -137,9 +153,10 @@ public class MainActivity extends AppCompatActivity {
                 tvMessage.setText("prive" + ": " + (new JSONObject(topicMessage.getPayload()).get("texte")).toString());
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("EEEE dd MMMM y HH:mm:ss");
                 LocalDateTime now = LocalDateTime.now(ZoneId.of("America/Montreal"));
-                tvDate.setText(now.toString());
+                tvDate.setText(now.toString().replace("T"," "));
 
-                String strAvatarMessage = (new JSONObject(topicMessage.getPayload()).get("de")).toString();
+                String de = (new JSONObject(topicMessage.getPayload()).get("de")).toString();
+                String strAvatarMessage = login.get("http://192.168.50.54:8100/getAvatarById/" + de,"");
                 strAvatarMessage = strAvatarMessage.replace("data:image/jpeg;base64,","");
                 strAvatarMessage = strAvatarMessage.replace("data:image/png;base64,","");
                 byte[] decodedString1 = Base64.decode(strAvatarMessage, Base64.DEFAULT);
@@ -171,12 +188,14 @@ public class MainActivity extends AppCompatActivity {
             hbox.addView(tvMessage);
 
 
+
             tvMessage.setText("public" + ": " + (new JSONObject(topicMessage.getPayload()).get("texte")).toString());
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("EEEE dd MMMM y HH:mm:ss");
             LocalDateTime now = LocalDateTime.now(ZoneId.of("America/Montreal"));
-            tvDate.setText(now.toString());
+            tvDate.setText(now.toString().replace("T"," "));
 
-            String strAvatarMessage = (new JSONObject(topicMessage.getPayload()).get("de")).toString();
+            String de = (new JSONObject(topicMessage.getPayload()).get("de")).toString();
+            String strAvatarMessage = login.get("http://192.168.50.54:8100/getAvatarById/" + de,"");
             strAvatarMessage = strAvatarMessage.replace("data:image/jpeg;base64,","");
             strAvatarMessage = strAvatarMessage.replace("data:image/png;base64,","");
             byte[] decodedString1 = Base64.decode(strAvatarMessage, Base64.DEFAULT);
@@ -257,6 +276,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.LENGTH_LONG).show();
         }else{
             Intent myIntent = new Intent(v.getContext(), Grades.class);
+            myIntent.putExtra("user",hiddenID.getText().toString());
             startActivity(myIntent);
         }
 
@@ -273,5 +293,15 @@ public class MainActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
         startActivity(getIntent());
         overridePendingTransition(0, 0);
+    }
+
+    public void sendMsgPrive(View v){
+
+        mStompClient.send("/sujet/prive","{\"de\":\""+hiddenID.getText().toString()+"\",\"status\":\"prive\",\"texte\":\""+((TextView)tvMessage.getChildAt(1)).getText().toString()+"\"}").subscribe();
+    }
+
+    public void sendMsgPublic(View v){
+
+        mStompClient.send("/sujet/public","{\"de\":\""+hiddenID.getText().toString()+"\",\"status\":\"public\",\"texte\":\""+((TextView)tvMessage.getChildAt(1)).getText().toString()+"\"}").subscribe();
     }
 }

@@ -130,27 +130,27 @@ public class Ecole extends AppCompatActivity {
 
         layoutManager = new LinearLayoutManager(Ecole.this);
         venerable.setLayoutManager(layoutManager);
-        CompteAdapter adapter = new CompteAdapter(lstVenerable,getApplicationContext());
+        CompteAdapter adapter = new CompteAdapter(lstVenerable,getApplicationContext(),false);
         venerable.setAdapter(adapter);
 
         RecyclerView.LayoutManager layoutManager1 = layoutManager = new LinearLayoutManager(Ecole.this);
         honte.setLayoutManager(layoutManager1);
-        CompteAdapter adapter1 = new CompteAdapter(lstHonte,getApplicationContext());
+        CompteAdapter adapter1 = new CompteAdapter(lstHonte,getApplicationContext(),false);
         honte.setAdapter(adapter1);
 
         layoutManager = new LinearLayoutManager(Ecole.this);
         prof.setLayoutManager(layoutManager);
-        CompteAdapter adapter2 = new CompteAdapter(lstprof,getApplicationContext());
+        CompteAdapter adapter2 = new CompteAdapter(lstprof,getApplicationContext(),false);
         prof.setAdapter(adapter2);
 
         layoutManager = new LinearLayoutManager(Ecole.this);
         ancien.setLayoutManager(layoutManager);
-        CompteAdapter adapter3 = new CompteAdapter(lstAncien,getApplicationContext());
+        CompteAdapter adapter3 = new CompteAdapter(lstAncien,getApplicationContext(),false);
         ancien.setAdapter(adapter3);
 
         layoutManager = new LinearLayoutManager(Ecole.this);
         nouveau.setLayoutManager(layoutManager);
-        CompteAdapter adapter4 = new CompteAdapter(lstNouveau,getApplicationContext());
+        CompteAdapter adapter4 = new CompteAdapter(lstNouveau,getApplicationContext(),false);
         nouveau.setAdapter(adapter4);
 
     }

@@ -169,84 +169,72 @@
             android:id="@+id/spec1"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_margin="5dp"
             android:layout_weight="1" />
 
         <ImageView
             android:id="@+id/spec2"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_margin="5dp"
             android:layout_weight="1" />
 
         <ImageView
             android:id="@+id/spec3"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_margin="5dp"
             android:layout_weight="1" />
 
         <ImageView
             android:id="@+id/spec4"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_margin="5dp"
             android:layout_weight="1" />
 
         <ImageView
             android:id="@+id/spec5"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_margin="5dp"
             android:layout_weight="1" />
 
         <ImageView
             android:id="@+id/spec6"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_margin="5dp"
             android:layout_weight="1" />
 
         <ImageView
             android:id="@+id/spec7"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_margin="5dp"
             android:layout_weight="1" />
 
         <ImageView
             android:id="@+id/spec8"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_margin="5dp"
             android:layout_weight="1" />
 
         <ImageView
             android:id="@+id/spec9"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_margin="5dp"
             android:layout_weight="1" />
 
         <ImageView
             android:id="@+id/spec10"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_margin="5dp"
             android:layout_weight="1" />
 
         <ImageView
             android:id="@+id/spec11"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_margin="5dp"
             android:layout_weight="1" />
 
         <ImageView
             android:id="@+id/spec12"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_margin="5dp"
             android:layout_weight="1" />
 
     </LinearLayout>

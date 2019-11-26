@@ -6,8 +6,8 @@
     <string name="gradesMenu">Cliquer <u>ici</u> pour accéder au passage des grades (sensei ou vénérable)</string>
     <string name="ecoleMenu">Cliquer &lt;u>ici&lt;/u> pour voir les membres de notre école</string>
     <string name="votreMessage">Votre message :</string>
-    <string name="messagePublic">Envoyer message privé</string>
-    <string name="messagePrive">Envoyer message public</string>
+    <string name="messagePublic">Envoyer message public</string>
+    <string name="messagePrive">Envoyer message privé</string>
     <string name="reponses">Réponses</string>
     <string name="loginTitre">Ouverture de session</string>
     <string name="loginSousTitre">Veuillez vous identifier</string>

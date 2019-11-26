@@ -23,17 +23,17 @@ public class CompteAdapter extends RecyclerView.Adapter<CompteAdapter.RestoViewH
 
     public ArrayList<Compte> compteList = new ArrayList<>();
     int selected_position = 0;
+    boolean binAfficherHighLight;
     static public String userSelected = "";
-    public CompteAdapter(ArrayList<Compte> compteList, Context context) {
+    public CompteAdapter(ArrayList<Compte> compteList, Context context,boolean binAfficherHighLight) {
         this.compteList = compteList;
+        this.binAfficherHighLight = binAfficherHighLight;
     }
 
     @Override
     public RestoViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v= LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_row,parent,false);
         RestoViewHolder viewHolder=new RestoViewHolder(v);
-
-
         return viewHolder;
     }
 
@@ -47,10 +47,12 @@ public class CompteAdapter extends RecyclerView.Adapter<CompteAdapter.RestoViewH
         holder.userID.setText(compte.getName());
 
         Compte item = compteList.get(position);
-        if(position == 0)
-            userSelected = compte.getName();
+
         // Here I am just highlighting the background
-        holder.itemView.setBackgroundColor(selected_position == position ? Color.GREEN : Color.TRANSPARENT);
+        if(selected_position == position)
+            userSelected = compte.getName();
+        if(binAfficherHighLight)
+            holder.itemView.setBackgroundColor(selected_position == position ? Color.GREEN : Color.TRANSPARENT);
 
     }
 
@@ -75,13 +77,16 @@ public class CompteAdapter extends RecyclerView.Adapter<CompteAdapter.RestoViewH
         public void onClick(View v) {
             // Below line is just like a safety check, because sometimes holder could be null,
             // in that case, getAdapterPosition() will return RecyclerView.NO_POSITION
-            if (getAdapterPosition() == RecyclerView.NO_POSITION) return;
-            Compte compte = compteList.get(getAdapterPosition());
-            userSelected = compte.getName();
-            // Updating old as well as new positions
-            notifyItemChanged(selected_position);
-            selected_position = getAdapterPosition();
-            notifyItemChanged(selected_position);
+            if(binAfficherHighLight){
+                if (getAdapterPosition() == RecyclerView.NO_POSITION) return;
+                Compte compte = compteList.get(getAdapterPosition());
+                userSelected = compte.getName();
+                // Updating old as well as new positions
+                notifyItemChanged(selected_position);
+                selected_position = getAdapterPosition();
+                notifyItemChanged(selected_position);
+            }
+
 
             // Do your another stuff for your onClick
         }

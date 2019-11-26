@@ -97,7 +97,7 @@ public class MaClasseLogin {
         return response.body().string();
     }
 
-    String postGetCompteByAvatar(String url, String avatar) throws IOException {
+    public String postGetCompteByAvatar(String url, String avatar) throws IOException {
         RequestBody formBody = new FormBody.Builder()
                 .addEncoded("avatar", avatar)
 
@@ -129,7 +129,7 @@ public class MaClasseLogin {
         return responseData;
     }
 
-    String get(String url, String json) throws IOException {
+    public String get(String url, String json) throws IOException {
         Request request = new Request.Builder()
                 .url(url)
                 .addHeader("cookie", "JSESSIONID=" + JSESSIONID )
@@ -152,6 +152,7 @@ public class MaClasseLogin {
                 String response1 = (new JSONObject(responseData)).getString("error");
                 if(response1.equals("Unauthorized")){
                     responseData= "Unauthorized";
+
                 }else{
                     responseData = "";
                     Log.d("STOMP", " get()=ERREUR");

@@ -98,7 +98,7 @@ public class Kumite extends AppCompatActivity {
     TextView combatTxt9;
     TextView combatTxt10;
     TextView combatTxt11;
-
+    Boolean binJoue = false;
     Button btnAction;
     Button btnAction0;
     Button btnAction1;
@@ -272,12 +272,15 @@ public class Kumite extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if(avatarLocal.contains(arbitreActuel) || arbitreActuel.contains(avatarLocal)){//Afficher Hajime! pour l'arbitre
-                            btnAction.setText("Hajime!");
-                            btnAction.setVisibility(View.VISIBLE);
+                        if(binJoue){
+                            if(avatarLocal.contains(arbitreActuel) || arbitreActuel.contains(avatarLocal)){//Afficher Hajime! pour l'arbitre
+                                btnAction.setText("Hajime!");
+                                btnAction.setVisibility(View.VISIBLE);
+                            }
+                            if(combattants.contains(avatarLocal))
+                                btnAction.setVisibility(View.INVISIBLE);
                         }
-                        if(combattants.contains(avatarLocal))
-                            btnAction.setVisibility(View.INVISIBLE);
+
                     }
                 });
 
@@ -293,7 +296,13 @@ public class Kumite extends AppCompatActivity {
                 avatar = "";
             }
             clearCombatText();
-            combatTxt6.setText("Hajime!");//Afficher hajime pour 2 secondes
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    combatTxt6.setText("Hajime!");//Afficher hajime pour 2 secondes
+                }
+            });
+
 
             setTimeout(() -> clearCombatText(), 2000);
 
@@ -312,15 +321,18 @@ public class Kumite extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if(avatarLocal.equals(arbitreActuel)){
-                        btnAction.setVisibility(View.INVISIBLE);
-                    }else{
-                        btnAction0.setVisibility(View.VISIBLE);
-                        btnAction.setVisibility(View.VISIBLE);
-                        btnAction1.setVisibility(View.VISIBLE);
-                        btnAction.setText("Papier");
-                        btnAction.setEnabled(true);
+                    if(binJoue){
+                        if(avatarLocal.equals(arbitreActuel)){
+                            btnAction.setVisibility(View.INVISIBLE);
+                        }else{
+                            btnAction0.setVisibility(View.VISIBLE);
+                            btnAction.setVisibility(View.VISIBLE);
+                            btnAction1.setVisibility(View.VISIBLE);
+                            btnAction.setText("Papier");
+                            btnAction.setEnabled(true);
+                        }
                     }
+
                 }
             });
 
@@ -362,10 +374,13 @@ public class Kumite extends AppCompatActivity {
                     @Override
                     public void run() {
                         combatTxt6.setText("Ipon!");
-                        btnAction.setVisibility(View.INVISIBLE);
-                        btnAction0.setVisibility(View.INVISIBLE);
-                        btnAction1.setVisibility(View.INVISIBLE);
-                        btnAction.setText("Rei!");
+                        if(binJoue){
+                            btnAction.setVisibility(View.INVISIBLE);
+                            btnAction0.setVisibility(View.INVISIBLE);
+                            btnAction1.setVisibility(View.INVISIBLE);
+                            btnAction.setText("Rei!");
+                        }
+
                     }
                 });
 
@@ -458,6 +473,15 @@ public class Kumite extends AppCompatActivity {
                 arbitres = new ArrayList<>();
             }else
                 arbitreTemp = "";
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    btnAction0.setVisibility(View.INVISIBLE);
+                    btnAction.setVisibility(View.INVISIBLE);
+                    btnAction1.setVisibility(View.INVISIBLE);
+                    btnAction.setText("Rei!");
+                }
+            });
             envoyerCompetiteur(getCompteIdByAvatar(combattants.get(0)));
             envoyerCompetiteur(getCompteIdByAvatar(combattants.get(1)));
             intCountRei=0;
@@ -508,6 +532,7 @@ public class Kumite extends AppCompatActivity {
         });
 
         envoyerSpectateur(idCompte);
+        updateCombat();
         mStompClient.topic("/sujet/updateInfoUser").subscribe(topicMessage -> {
             String topic = topicMessage.getPayload();
             String topicFormatted = topic.substring(1, topic.length()-1);
@@ -711,22 +736,26 @@ public class Kumite extends AppCompatActivity {
             });
 
         }
+        if(keyList.size()>1){
+            byte[] decodedString1 = Base64.decode(arbitreActuel.replace("data:image/jpeg;base64,",""), Base64.DEFAULT);
+            Bitmap decodedByte1 = BitmapFactory.decodeByteArray(decodedString1, 0,decodedString1.length);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    combat6.setImageBitmap(decodedByte1);
+                }
+            });
+        }
 
-        byte[] decodedString1 = Base64.decode(arbitreActuel.replace("data:image/jpeg;base64,",""), Base64.DEFAULT);
-        Bitmap decodedByte1 = BitmapFactory.decodeByteArray(decodedString1, 0,decodedString1.length);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                combat6.setImageBitmap(decodedByte1);
-            }
-        });
+
 
 
         if(!avatarLocal.contains(arbitreActuel) && !arbitreActuel.contains(avatarLocal)){
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    btnAction.setVisibility(View.VISIBLE);
+                    if(binJoue)
+                        btnAction.setVisibility(View.VISIBLE);
                 }
             });
         }
@@ -749,6 +778,12 @@ public class Kumite extends AppCompatActivity {
             }else{
                 combattants.add(competiteurs.get(0));
                 combattants.add(competiteurs.get(1));
+            }
+
+            if((competiteurs.get(0).equals(avatarLocal.replace("data:image/jpeg;base64,","")) || competiteurs.get(1).equals(avatarLocal.replace("data:image/jpeg;base64,","")))){
+                binJoue = true;
+            }else{
+                binJoue = false;
             }
 
 
@@ -829,10 +864,13 @@ public class Kumite extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                btnAction0.setVisibility(View.INVISIBLE);
-                btnAction.setVisibility(View.INVISIBLE);
-                btnAction1.setVisibility(View.INVISIBLE);
-                btnAction.setText("Rei!");
+                if(binJoue){
+                    btnAction0.setVisibility(View.INVISIBLE);
+                    btnAction.setVisibility(View.INVISIBLE);
+                    btnAction1.setVisibility(View.INVISIBLE);
+                    btnAction.setText("Rei!");
+                }
+
             }
         });
 
@@ -849,9 +887,12 @@ public class Kumite extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    btnAction0.setVisibility(View.INVISIBLE);
-                    btnAction.setVisibility(View.INVISIBLE);
-                    btnAction1.setVisibility(View.INVISIBLE);
+                    if(binJoue){
+                        btnAction0.setVisibility(View.INVISIBLE);
+                        btnAction.setVisibility(View.INVISIBLE);
+                        btnAction1.setVisibility(View.INVISIBLE);
+                    }
+
                 }
             });
 
