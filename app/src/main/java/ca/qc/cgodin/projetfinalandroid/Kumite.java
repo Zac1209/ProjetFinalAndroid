@@ -8,8 +8,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.shapes.Shape;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Base64;
@@ -21,6 +24,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Console;
@@ -109,6 +113,8 @@ public class Kumite extends AppCompatActivity {
     Drawable avatarDefault;
     Drawable combatDefault;
     TextView hiddenID;
+    TextView tvCredit;
+    TextView tvPoint;
     @SuppressLint("CheckResult")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,7 +122,7 @@ public class Kumite extends AppCompatActivity {
         setContentView(R.layout.activity_kumite);
 
 
-        mStompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, "ws://10.0.2.2:8100/webSocket/websocket");
+        mStompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, "ws://192.168.50.54:8100/webSocket/websocket");
         mStompClient.connect();
         avatarDefault = getDrawable(R.drawable.avatardefault);
         combatDefault = getDrawable(R.drawable.combatdefault);
@@ -127,6 +133,8 @@ public class Kumite extends AppCompatActivity {
         rbCompetiteur = findViewById(R.id.rbCompetiteur);
         hiddenID = findViewById(R.id.hiddenID);
         rbArbitre = findViewById(R.id.rbArbitre);
+        tvCredit = findViewById(R.id.tvCreditKum);
+        tvPoint = findViewById(R.id.tvPointKum);
         spec1 = findViewById(R.id.spec1);
         spec2 = findViewById(R.id.spec2);
         spec3 = findViewById(R.id.spec3);
@@ -204,17 +212,17 @@ public class Kumite extends AppCompatActivity {
 
         mStompClient.topic("/sujet/positionUpdate").subscribe(topicMessage -> {
             String ajaxReponse = "";
-            ajaxReponse = login.get("http://10.0.2.2:8100/getCompetiteurs","");
+            ajaxReponse = login.get("http://192.168.50.54:8100/getCompetiteurs","");
             competiteurs.clear();
             if(!ajaxReponse.equals("[]"))
                 competiteurs = new ArrayList<String>(Arrays.asList(ajaxReponse.replace("[","").replace("]","").replace("data:image/jpeg;base64,","").replace("\"","").split(",")));
 
-            ajaxReponse = login.get("http://10.0.2.2:8100/getSpectateurs","");
+            ajaxReponse = login.get("http://192.168.50.54:8100/getSpectateurs","");
             spectateurs.clear();
             if(!ajaxReponse.equals("[]"))
                 spectateurs = new ArrayList<String>(Arrays.asList(ajaxReponse.replace("[","").replace("]","").replace("data:image/jpeg;base64,","").replace("\"","").split(",")));
 
-            ajaxReponse = login.get("http://10.0.2.2:8100/getArbitres","");
+            ajaxReponse = login.get("http://192.168.50.54:8100/getArbitres","");
             arbitres.clear();
             if(!ajaxReponse.equals("[]"))
                 arbitres = new ArrayList<String>(Arrays.asList(ajaxReponse.replace("[","").replace("]","").replace("data:image/jpeg;base64,","").replace("\"","").split(",")));
@@ -223,7 +231,7 @@ public class Kumite extends AppCompatActivity {
             try{
                 avatar = (new JSONObject(topicMessage.getPayload()).get("idUser")).toString();
                 if(!avatar.equals(""))
-                    avatar = login.get("http://10.0.2.2:8100/getAvatarById/" + avatar,"");
+                    avatar = login.get("http://192.168.50.54:8100/getAvatarById/" + avatar,"");
             }catch(Exception e){
                 avatar = "";
             }
@@ -241,7 +249,7 @@ public class Kumite extends AppCompatActivity {
                 avatar = "";
             }
             intCountRei++;
-            avatar = login.get("http://10.0.2.2:8100/getAvatarById/"+avatar,"");
+            avatar = login.get("http://192.168.50.54:8100/getAvatarById/"+avatar,"");
             avatar = avatar.replace("data:image/jpeg;base64,","");
             String position = "";
             for (Map.Entry<String,String> entry : combattantsSavedPosition.entrySet()) {
@@ -258,7 +266,7 @@ public class Kumite extends AppCompatActivity {
                 btnAction.setEnabled(false);
             if(intCountRei == 2){//Prêt à commencer
                 if(avatarLocal.contains(avatar)){
-                    login.get("http://10.0.2.2:8100/saveCombatState/"+getCompteIdByAvatar(arbitreActuel)+"/"+getCompteIdByAvatar(combattants.get(0))+"/10/"+getCompteIdByAvatar(combattants.get(1))+"/2","");
+                    login.get("http://192.168.50.54:8100/saveCombatState/"+getCompteIdByAvatar(arbitreActuel)+"/"+getCompteIdByAvatar(combattants.get(0))+"/10/"+getCompteIdByAvatar(combattants.get(1))+"/2","");
                     mStompClient.send("/sujet/updateCombat","").subscribe();
                 }
                 runOnUiThread(new Runnable() {
@@ -280,7 +288,7 @@ public class Kumite extends AppCompatActivity {
             String avatar;
             try{
                 String userID = (new JSONObject(topicMessage.getPayload()).get("idUser")).toString();
-                avatar = login.get("http://10.0.2.2:8100/getAvatarById/" + userID,"");
+                avatar = login.get("http://192.168.50.54:8100/getAvatarById/" + userID,"");
             }catch(Exception e){
                 avatar = "";
             }
@@ -296,7 +304,7 @@ public class Kumite extends AppCompatActivity {
                 compte1 = getCompteIdByAvatar("data:image/jpeg;base64," + arbitreActuel.replace("data:image/jpeg;base64,",""));
                 compte2 = getCompteIdByAvatar("data:image/jpeg;base64," + combattants.get(0).replace("data:image/jpeg;base64,",""));
                 compte3 = getCompteIdByAvatar("data:image/jpeg;base64," + combattants.get(1).replace("data:image/jpeg;base64,",""));
-                login.get("http://10.0.2.2:8100/saveCombatState/"+compte1+"/"+compte2+"/9/"+compte3+"/3","");
+                login.get("http://192.168.50.54:8100/saveCombatState/"+compte1+"/"+compte2+"/9/"+compte3+"/3","");
                 mStompClient.send("/sujet/updateCombat","").subscribe();
                 mStompClient.send("/sujet/positionUpdate","{\"avatar\":\"\",\"idUser\":\"\"}").subscribe();
             }
@@ -398,7 +406,7 @@ public class Kumite extends AppCompatActivity {
                                         public void onClick(DialogInterface dialog, int which) {
                                             String ajaxResult = "";
                                             try {
-                                                ajaxResult = login.get("http://10.0.2.2:8100/arbitreResterEnPlace/" + getCompteIdByAvatar(arbitreActuel),"");
+                                                ajaxResult = login.get("http://192.168.50.54:8100/arbitreResterEnPlace/" + getCompteIdByAvatar(arbitreActuel),"");
                                                 if(ajaxResult.equals(arbitreActuel)){//Il reste
                                                     arbitreTemp = ajaxResult;
                                                 }else
@@ -457,13 +465,14 @@ public class Kumite extends AppCompatActivity {
             clearCombat();
             clearCombatText();
         });
+
+
         Intent intent = getIntent();
         String valeur = intent.getStringExtra("valeur");
         String idCompte = intent.getStringExtra("idCompte");
         String ceintureLive = intent.getStringExtra("ceinture");
 
         avatarLocal = valeur;
-
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -472,8 +481,12 @@ public class Kumite extends AppCompatActivity {
         });
 
         String username = "";
+        String credit = "";
+        String point = "";
         try {
-            username=login.get("http://10.0.2.2:8100/getUsername","");
+            username=login.get("http://192.168.50.54:8100/getUsername","");
+            point = login.get("http://192.168.50.54:8100/getPoint/" + username,"");
+            credit = login.get("http://192.168.50.54:8100/getCredit/" + username,"");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -481,23 +494,53 @@ public class Kumite extends AppCompatActivity {
         byte[] decodedString1 = Base64.decode(valeur.replace("data:image/jpeg;base64,",""), Base64.DEFAULT);
         Bitmap decodedByte1 = BitmapFactory.decodeByteArray(decodedString1, 0,decodedString1.length);
         String finalUsername = username;
+        String finalCredit = credit;
+        String finalPoint = point;
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 tvNom.setText(finalUsername);
                 avatarIMG.setImageBitmap(decodedByte1);
                 hiddenID.setText(idCompte);
+                tvCredit.setText(finalCredit);
+                tvPoint.setText(finalPoint);
             }
         });
 
         envoyerSpectateur(idCompte);
+        mStompClient.topic("/sujet/updateInfoUser").subscribe(topicMessage -> {
+            String topic = topicMessage.getPayload();
+            String topicFormatted = topic.substring(1, topic.length()-1);
+            String user = (new JSONObject(topicFormatted.replace("\\","")).get("user")).toString();
+            if(user.equals(finalUsername)){
+                String point1 = login.get("http://192.168.50.54:8100/getPoint/" + finalUsername,"");
+                String credit1 = login.get("http://192.168.50.54:8100/getCredit/" + finalUsername,"");
+                String ceinture1 = login.get("http://192.168.50.54:8100/getCeinture","");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        tvCredit.setText(credit1);
+                        tvPoint.setText(point1);
+                        tvCeinture.setText(ceinture1);
+                    }
+                });
+
+            }
+
+        });
     }
 
 
-    public void onClickDojo(View v) {
-        Intent myIntent = new Intent(v.getContext(), MainActivity.class);
-        startActivity(myIntent);
+    @Override
+    public void onStop(){
+        super.onStop();
+        try {
+            login.get("http:192.168.50.54:8100/exit/" + hiddenID.getText().toString(),"");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+
 
 
 
@@ -507,6 +550,7 @@ public class Kumite extends AppCompatActivity {
             int id = getResources().getIdentifier("spec" + i, "id", this.getBaseContext().getPackageName());
             ImageView view = findViewById(id);
 
+
             if(view.getTag().equals("vide")){
                 byte[] decodedString1 = Base64.decode(spectateurs.get(i-1), Base64.DEFAULT);
                 Bitmap decodedByte1 = BitmapFactory.decodeByteArray(decodedString1, 0,decodedString1.length);
@@ -515,6 +559,7 @@ public class Kumite extends AppCompatActivity {
                     public void run() {
                         view.setImageBitmap(decodedByte1);
                         view.setTag("avatar");
+
                     }
                 });
 
@@ -532,6 +577,7 @@ public class Kumite extends AppCompatActivity {
                     public void run() {
                         view.setImageBitmap(decodedByte1);
                         view.setTag("avatar");
+
                     }
                 });
             }
@@ -581,6 +627,7 @@ public class Kumite extends AppCompatActivity {
         for(int i =1;i<=11;i++){
             int id = getResources().getIdentifier("combat" + i, "id", this.getBaseContext().getPackageName());
             ImageView view = findViewById(id);
+
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -651,12 +698,15 @@ public class Kumite extends AppCompatActivity {
             String key = keyList.get(i);
             int id = getResources().getIdentifier("combat" + key, "id", this.getBaseContext().getPackageName());
             ImageView view = findViewById(id);
+
             byte[] decodedString1 = Base64.decode(combattantsSavedPosition.get(key), Base64.DEFAULT);
             Bitmap decodedByte1 = BitmapFactory.decodeByteArray(decodedString1, 0,decodedString1.length);
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     view.setImageBitmap(decodedByte1);
+                    String user = getCompteIdByAvatar("data:image/jpeg;base64," + combattantsSavedPosition.get(key));
+
                 }
             });
 
@@ -709,7 +759,7 @@ public class Kumite extends AppCompatActivity {
                 compte1 = getCompteIdByAvatar("data:image/jpeg;base64," + arbitres.get(0).replace("data:image/jpeg;base64,",""));
                 compte2 = getCompteIdByAvatar("data:image/jpeg;base64," + combattants.get(0).replace("data:image/jpeg;base64,",""));
                 compte3 = getCompteIdByAvatar("data:image/jpeg;base64," + combattants.get(1).replace("data:image/jpeg;base64,",""));
-                login.get("http://10.0.2.2:8100/saveCombatState/"+compte1+"/"+compte2+"/11/"+compte3+"/1","");
+                login.get("http://192.168.50.54:8100/saveCombatState/"+compte1+"/"+compte2+"/11/"+compte3+"/1","");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -723,7 +773,7 @@ public class Kumite extends AppCompatActivity {
     private String getCompteIdByAvatar(String avatar){
         String returnString = "";
         try {
-            returnString = login.postGetCompteByAvatar("http://10.0.2.2:8100/getCompteByAvatar",avatar);
+            returnString = login.postGetCompteByAvatar("http://192.168.50.54:8100/getCompteByAvatar",avatar);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -733,7 +783,7 @@ public class Kumite extends AppCompatActivity {
 
     private void envoyerSpectateur(String id) {
         try {
-            login.get("http://10.0.2.2:8100/saveSpectateur/" + id,"");
+            login.get("http://192.168.50.54:8100/saveSpectateur/" + id,"");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -744,7 +794,7 @@ public class Kumite extends AppCompatActivity {
 
     private void envoyerCompetiteur(String id) {
         try {
-            login.get("http://10.0.2.2:8100/saveCompetiteur/" + id,"");
+            login.get("http://192.168.50.54:8100/saveCompetiteur/" + id,"");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -753,7 +803,7 @@ public class Kumite extends AppCompatActivity {
 
     private void envoyerArbitre(String id) {
         try {
-            login.get("http://10.0.2.2:8100/saveArbitre/" + id,"");
+            login.get("http://192.168.50.54:8100/saveArbitre/" + id,"");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -790,7 +840,7 @@ public class Kumite extends AppCompatActivity {
         String ajaxResult = "";
         String compteId;
         try {
-            ajaxResult = login.get("http://10.0.2.2:8100/saveCombatResult/" + hiddenID.getText().toString() + "/" + result,"");
+            ajaxResult = login.get("http://192.168.50.54:8100/saveCombatResult/" + hiddenID.getText().toString() + "/" + result,"");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -812,7 +862,7 @@ public class Kumite extends AppCompatActivity {
     private void updateCombat(){
         String ajaxReturn = "";
         try {
-            ajaxReturn = login.get("http://10.0.2.2:8100/getCombattant","");
+            ajaxReturn = login.get("http://192.168.50.54:8100/getCombattant","");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -836,7 +886,7 @@ public class Kumite extends AppCompatActivity {
         }
 
         try {
-            arbitreActuel = login.get("http://10.0.2.2:8100/getArbitreActuel","");
+            arbitreActuel = login.get("http://192.168.50.54:8100/getArbitreActuel","");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -848,6 +898,50 @@ public class Kumite extends AppCompatActivity {
     public void clickDojo(View v){
         Intent intent = new Intent(Kumite.this,MainActivity.class);
         startActivity(intent);
+    }
+
+    public GradientDrawable creerContourAvatar(String username){
+        GradientDrawable gradientDrawableDefault = new GradientDrawable();
+        gradientDrawableDefault.setCornerRadius(5);
+
+        String ceinture = "";
+        if(!username.equals("")) {
+            try {
+                ceinture = login.get("http://192.168.50.54:8100/getCeinture/" + username, "");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        switch (ceinture){
+            case "BLANCHE":
+                gradientDrawableDefault.setColor(Color.WHITE);
+                gradientDrawableDefault.setStroke(1,Color.BLACK);
+                break;
+            case "JAUNE":
+                gradientDrawableDefault.setColor(Color.YELLOW);
+                break;
+            case "ORANGE":
+                int color = Color.rgb(100,65,0);
+                gradientDrawableDefault.setColor(color);
+                break;
+            case "VERTE":
+                gradientDrawableDefault.setColor(Color.GREEN);
+                break;
+            case "BLEUE":
+                gradientDrawableDefault.setColor(Color.BLUE);
+                break;
+            case "MARRON":
+                int color1 = Color.rgb(181,101,29);
+                gradientDrawableDefault.setColor(color1);
+                break;
+            case "NOIRE":
+                gradientDrawableDefault.setColor(Color.BLACK);
+                break;
+                default:
+                    gradientDrawableDefault.setColor(Color.WHITE);
+        }
+
+        return gradientDrawableDefault;
     }
 
 

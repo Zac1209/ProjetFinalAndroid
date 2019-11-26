@@ -33,7 +33,7 @@ public class MaClasseLogin {
         pass = pass1;
         Log.d("STOMP", "etablirConnexion()");
         String json = "";
-        String url = "http://10.0.2.2:8100/login";
+        String url = "http://192.168.50.54:8100/login";
         try {
             postLogin(url ,json,user, pass);
         } catch (IOException e) {
@@ -50,28 +50,13 @@ public class MaClasseLogin {
 //https://github.com/square/okhttp/wiki/Recipes
         Log.d("STOMP", "terminerConnexion()");
         String json = "";
-        String url = "http://10.0.2.2:8100/logout";
+        String url = "http://192.168.50.54:8100/logout";
         try {
             postLogin(url ,json,user, pass);
         } catch (IOException e) {
             e.printStackTrace();
         }
         JSESSIONID="";
-    }
-
-
-
-    public void test()   {
-//https://square.github.io/okhttp/
-        //Log.d("STOMP", "dateHeure()");
-        String json = "";
-        String url = "http://10.0.2.2:8100/test";
-        try {
-            postLogin(url ,json,null,null);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
     }
 
     String postLogin(String url, String json, String user, String pass) throws IOException {
@@ -110,37 +95,6 @@ public class MaClasseLogin {
         else
             JSESSIONID = "ERREUR LOGIN";
         return response.body().string();
-    }
-
-    String postAfterLogin(String url, String json) throws IOException {
-        RequestBody formBody = new FormBody.Builder()
-                .add("username", "v1@dojo")
-                .add("password", "Patate123")
-
-                .build();
-        Request request = new Request.Builder()
-                .url(url)
-                .addHeader("cookie", "JSESSIONID=" + JSESSIONID )
-                .addHeader("rest","oui")
-                .addHeader("Content-Type", "application/x-www-form-urlencoded")
-                .post(formBody)
-
-                .build();
-
-        Response response = client.newCall(request).execute();
-        //Attention, on ne peut pas lire plus d'une fois la valeur de response.body().string()????
-        //Voilà pourquoi, j'utilise et retourne responseData.
-
-        final String responseData = response.body().string();
-        if (response.isSuccessful()) {
-            Log.d("STOMP", " post2()=" + responseData);
-
-        }
-        else {
-
-            Log.d("STOMP", " post2()=ERREUR");
-        }
-        return responseData;
     }
 
     String postGetCompteByAvatar(String url, String avatar) throws IOException {

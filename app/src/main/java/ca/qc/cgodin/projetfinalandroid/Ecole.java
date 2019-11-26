@@ -63,7 +63,7 @@ public class Ecole extends AppCompatActivity {
 
         String ajaxReturn = "";
         try {
-            ajaxReturn = login.get("http://10.0.2.2:8100/getVenerable","");
+            ajaxReturn = login.get("http://192.168.50.54:8100/getVenerable","");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -74,7 +74,7 @@ public class Ecole extends AppCompatActivity {
 
         ajaxReturn = "";
         try {
-            ajaxReturn = login.get("http://10.0.2.2:8100/getHonte","");
+            ajaxReturn = login.get("http://192.168.50.54:8100/getHonte","");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -88,7 +88,7 @@ public class Ecole extends AppCompatActivity {
 
         ajaxReturn = "";
         try {
-            ajaxReturn = login.get("http://10.0.2.2:8100/getProf","");
+            ajaxReturn = login.get("http://192.168.50.54:8100/getProf","");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -102,7 +102,7 @@ public class Ecole extends AppCompatActivity {
 
         ajaxReturn = "";
         try {
-            ajaxReturn = login.get("http://10.0.2.2:8100/getAncien","");
+            ajaxReturn = login.get("http://192.168.50.54:8100/getAncien","");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -116,7 +116,7 @@ public class Ecole extends AppCompatActivity {
 
         ajaxReturn = "";
         try {
-            ajaxReturn = login.get("http://10.0.2.2:8100/getNouveau","");
+            ajaxReturn = login.get("http://192.168.50.54:8100/getNouveau","");
         } catch (IOException e) {
             e.printStackTrace();
         }
