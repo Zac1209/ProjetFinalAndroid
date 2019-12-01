@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -183,6 +184,10 @@ public class MainActivity extends AppCompatActivity {
             LinearLayout hbox = new LinearLayout(MainActivity.this);
             hbox.setOrientation(LinearLayout.HORIZONTAL);
             hbox.setLayoutParams(new LinearLayoutCompat.LayoutParams(LinearLayoutCompat.LayoutParams.MATCH_PARENT, LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
+            LinearLayout.LayoutParams params = new TableRow.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+            imgAvatar.setLayoutParams(params);
+            tvDate.setLayoutParams(params);
+            tvMessage.setLayoutParams(params);
             hbox.addView(imgAvatar,100,75);
             hbox.addView(tvDate);
             hbox.addView(tvMessage);
@@ -192,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
             tvMessage.setText("public" + ": " + (new JSONObject(topicMessage.getPayload()).get("texte")).toString());
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("EEEE dd MMMM y HH:mm:ss");
             LocalDateTime now = LocalDateTime.now(ZoneId.of("America/Montreal"));
-            tvDate.setText(now.toString().replace("T"," "));
+            tvDate.setText(now.format(dtf));
 
             String de = (new JSONObject(topicMessage.getPayload()).get("de")).toString();
             String strAvatarMessage = login.get("http://192.168.50.54:8100/getAvatarById/" + de,"");

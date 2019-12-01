@@ -194,6 +194,7 @@ public class Kumite extends AppCompatActivity {
         clearSpecComp();
 
 
+
         View.OnClickListener radio_listener = new View.OnClickListener (){
             public void onClick(View v) {
                 //perform your action here
@@ -415,7 +416,7 @@ public class Kumite extends AppCompatActivity {
                                     .setIcon(android.R.drawable.ic_dialog_alert)
                                     .setTitle("Rester arbitre")
                                     .setMessage("Rester arbitre?")
-                                    .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                                    .setPositiveButton("Oui", new DialogInterface.OnClickListener()
                                     {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
@@ -433,7 +434,7 @@ public class Kumite extends AppCompatActivity {
                                         }
 
                                     })
-                                    .setNegativeButton("No", null)
+                                    .setNegativeButton("Non", null)
                                     .show();
                         }
                     });
@@ -906,7 +907,10 @@ public class Kumite extends AppCompatActivity {
             e.printStackTrace();
         }
         Map<String, Integer> myMap = new HashMap<String, Integer>();
-        String[] pairs = ajaxReturn.replace("[","").replace("\"","").replace("]","").replace("{","").replace("}","").replace("data:image/jpeg;base64,","").split(",");
+        String[] pairs = ajaxReturn.replace("[","").replace("\"","")
+                .replace("]","").replace("{","")
+                .replace("}","").replace("data:image/jpeg;base64,","")
+                .split(",");
         for (int i=0;i<pairs.length && pairs.length==2;i++) {
             String pair = pairs[i];
             String[] keyValue = pair.split(":");

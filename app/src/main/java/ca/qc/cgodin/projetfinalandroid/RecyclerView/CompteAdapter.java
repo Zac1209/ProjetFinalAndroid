@@ -48,7 +48,7 @@ public class CompteAdapter extends RecyclerView.Adapter<CompteAdapter.RestoViewH
 
         Compte item = compteList.get(position);
 
-        // Here I am just highlighting the background
+
         if(selected_position == position)
             userSelected = compte.getName();
         if(binAfficherHighLight)

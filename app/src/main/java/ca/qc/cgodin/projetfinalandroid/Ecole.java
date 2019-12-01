@@ -78,7 +78,11 @@ public class Ecole extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        String [] pairs = ajaxReturn.replace("[","").replace("\"","").replace("]","").replace("{","").replace("}","").replace("data:image/jpeg;base64,","").split(",");
+        String [] pairs = ajaxReturn.replace("[","")
+                .replace("\"","").replace("]","")
+                .replace("{","").replace("}","")
+                .replace("data:image/jpeg;base64,","")
+                .split(",");
         for (int i=0;i<pairs.length && pairs.length>=2;i++) {
             String pair = pairs[i];
             String[] keyValue = pair.split(":");
