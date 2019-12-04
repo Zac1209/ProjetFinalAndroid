@@ -39,6 +39,7 @@ import ua.naiksoftware.stomp.Stomp;
 import ua.naiksoftware.stomp.StompClient;
 
 public class Kumite extends AppCompatActivity {
+    private boolean actif;
     MaClasseLogin login = new MaClasseLogin();
     ArrayList<String> messages = new ArrayList<String>();
     ArrayList<String> spectateurs = new ArrayList<String>();
@@ -120,7 +121,6 @@ public class Kumite extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kumite);
-
 
         mStompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, "ws://10.0.2.2:8100/webSocket/websocket");
         mStompClient.connect();
@@ -261,7 +261,8 @@ public class Kumite extends AppCompatActivity {
             }
             int id = getResources().getIdentifier("combatTxt" + position, "id", this.getBaseContext().getPackageName());
             TextView view = findViewById(id);
-            view.setText("Rei!");
+            if(view != null)
+                view.setText("Rei!");
 
             if(avatarLocal.contains(avatar))
                 btnAction.setEnabled(false);
@@ -409,41 +410,43 @@ public class Kumite extends AppCompatActivity {
 
                 }
                 if(avatarLocal.equals(arbitreActuel)){
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            new AlertDialog.Builder(Kumite.this)
-                                    .setIcon(android.R.drawable.ic_dialog_alert)
-                                    .setTitle("Rester arbitre")
-                                    .setMessage("Rester arbitre?")
-                                    .setPositiveButton("Oui", new DialogInterface.OnClickListener()
-                                    {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            String ajaxResult = "";
-                                            try {
-                                                ajaxResult = login.get("http://10.0.2.2:8100/arbitreResterEnPlace/" + getCompteIdByAvatar(arbitreActuel),"");
-                                                if(ajaxResult.equals(arbitreActuel)){//Il reste
-                                                    arbitreTemp = ajaxResult;
-                                                }else
-                                                    arbitreTemp = "";
-                                            } catch (IOException e) {
-                                                e.printStackTrace();
+                    if(actif) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                new AlertDialog.Builder(Kumite.this)
+                                        .setIcon(android.R.drawable.ic_dialog_alert)
+                                        .setTitle("Rester arbitre")
+                                        .setMessage("Rester arbitre?")
+                                        .setPositiveButton("Oui", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                String ajaxResult = "";
+                                                try {
+                                                    ajaxResult = login.get("http://10.0.2.2:8100/arbitreResterEnPlace/" + getCompteIdByAvatar(arbitreActuel), "");
+                                                    if (ajaxResult.equals(arbitreActuel)) {//Il reste
+                                                        arbitreTemp = ajaxResult;
+                                                    } else
+                                                        arbitreTemp = "";
+                                                } catch (IOException e) {
+                                                    e.printStackTrace();
+                                                }
+
                                             }
 
-                                        }
-
-                                    })
-                                    .setNegativeButton("Non", null)
-                                    .show();
-                        }
-                    });
+                                        })
+                                        .setNegativeButton("Non", null)
+                                        .show();
+                            }
+                        });
+                    }
 
                 }
             }
         });
 
         mStompClient.topic("/sujet/updateCombat").subscribe(topicMessage -> {
+
             updateCombat();
         });
 
@@ -459,8 +462,10 @@ public class Kumite extends AppCompatActivity {
 
             }
             if(arbitreTemp.equals("")){//Reset d'arbitre
-                envoyerSpectateur(getCompteIdByAvatar(arbitreActuel));
+
                 if(avatarLocal.equals(arbitreActuel)){
+                    if(actif)
+                        envoyerSpectateur(getCompteIdByAvatar(arbitreActuel));
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -558,13 +563,18 @@ public class Kumite extends AppCompatActivity {
     @Override
     public void onStop(){
         super.onStop();
+        actif = false;
         try {
             login.get("http:10.0.2.2:8100/exit/" + hiddenID.getText().toString(),"");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
+    @Override
+    public void onStart() {
+        super.onStart();
+        actif = true;
+    }
 
 
 
@@ -779,11 +789,7 @@ public class Kumite extends AppCompatActivity {
                 combattants.add(competiteurs.get(1));
             }
 
-            if((competiteurs.get(0).equals(avatarLocal.replace("data:image/jpeg;base64,","")) || competiteurs.get(1).equals(avatarLocal.replace("data:image/jpeg;base64,","")))){
-                binJoue = true;
-            }else{
-                binJoue = false;
-            }
+
 
 
             String compte1 = "";
@@ -807,7 +813,7 @@ public class Kumite extends AppCompatActivity {
     private String getCompteIdByAvatar(String avatar){
         String returnString = "";
         try {
-            returnString = login.postGetCompteByAvatar("http://10.0.2.2:8100/getCompteByAvatar",avatar);
+            returnString = login.postGetCompteByAvatar("http://10.0.2.2:8100/getCompteByAvatar","data:image/jpeg;base64," + avatar.replace("data:image/jpeg;base64,",""));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -853,13 +859,13 @@ public class Kumite extends AppCompatActivity {
     }
 
     private void envoyerResultCombat(String valeur,String result) {
-        Bitmap bitmap = ((BitmapDrawable)combat3.getDrawable()).getBitmap();
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-        byte[] byteArray = byteArrayOutputStream .toByteArray();
-        String combat3SRCString = Base64.encodeToString(byteArray, Base64.DEFAULT);
 
-        int position = combat3SRCString.equals(avatarLocal) ? 4 : 8;
+        int position = 1;
+        if(combattantsSavedPosition.get("3").contains(avatarLocal) || avatarLocal.contains(combattantsSavedPosition.get("3")))
+            position = 4;
+        else
+            position = 8;
+
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -932,6 +938,15 @@ public class Kumite extends AppCompatActivity {
             arbitreActuel = login.get("http://10.0.2.2:8100/getArbitreActuel","");
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        if(combattants.size() == 2) {
+            if (combattants.get(0).replace("data:image/jpeg;base64,", "").contains(avatarLocal.replace("data:image/jpeg;base64,", "")) ||
+                    combattants.get(1).replace("data:image/jpeg;base64,", "").contains(avatarLocal.replace("data:image/jpeg;base64,", "")) ||
+                    arbitreActuel.replace("data:image/jpeg;base64,", "").contains(avatarLocal.replace("data:image/jpeg;base64,", ""))) {
+                binJoue = true;
+            } else {
+                binJoue = false;
+            }
         }
 
         afficherEstrade();
