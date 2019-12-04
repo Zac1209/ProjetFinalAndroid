@@ -32,7 +32,7 @@ public class Login extends AppCompatActivity {
 
         String ajaxReturn = "";
         try {
-            ajaxReturn = login.get("http://192.168.50.54:8100/getUserList","");
+            ajaxReturn = login.get("http://10.0.2.2:8100/getUserList","");
         } catch (IOException e) {
             e.printStackTrace();
         }

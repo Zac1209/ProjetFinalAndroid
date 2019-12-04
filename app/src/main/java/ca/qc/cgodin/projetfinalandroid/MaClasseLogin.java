@@ -33,7 +33,7 @@ public class MaClasseLogin {
         pass = pass1;
         Log.d("STOMP", "etablirConnexion()");
         String json = "";
-        String url = "http://192.168.50.54:8100/login";
+        String url = "http://10.0.2.2:8100/login";
         try {
             postLogin(url ,json,user, pass);
         } catch (IOException e) {
@@ -50,7 +50,7 @@ public class MaClasseLogin {
 //https://github.com/square/okhttp/wiki/Recipes
         Log.d("STOMP", "terminerConnexion()");
         String json = "";
-        String url = "http://192.168.50.54:8100/logout";
+        String url = "http://10.0.2.2:8100/logout";
         try {
             postLogin(url ,json,user, pass);
         } catch (IOException e) {

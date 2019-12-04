@@ -38,7 +38,7 @@ public class Grades extends AppCompatActivity {
 
     static public void passer(String user){
         try {
-            login.get("http://192.168.50.54:8100/Exam/" + user + "/" + currentUser + "/true","");
+            login.get("http://10.0.2.2:8100/Exam/" + user + "/" + currentUser + "/true","");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -47,7 +47,7 @@ public class Grades extends AppCompatActivity {
 
     static public void echec(String user){
         try {
-            login.get("http://192.168.50.54:8100/Exam/" + user + "/" + currentUser + "/false","");
+            login.get("http://10.0.2.2:8100/Exam/" + user + "/" + currentUser + "/false","");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -59,7 +59,7 @@ public class Grades extends AppCompatActivity {
         ArrayList<Compte> lstHonte = new ArrayList<>();
         String ajaxReturn = "";
         try {
-            ajaxReturn = login.get("http://192.168.50.54:8100/getMembreAdmissible","");
+            ajaxReturn = login.get("http://10.0.2.2:8100/getMembreAdmissible","");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -83,7 +83,7 @@ public class Grades extends AppCompatActivity {
 
         ajaxReturn = "";
         try {
-            ajaxReturn = login.get("http://192.168.50.54:8100/getHonte","");
+            ajaxReturn = login.get("http://10.0.2.2:8100/getHonte","");
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
             StrictMode.setThreadPolicy(policy);
         }
 
-        mStompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, "ws://192.168.50.54:8100/webSocket/websocket");
+        mStompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, "ws://10.0.2.2:8100/webSocket/websocket");
         mStompClient.connect();
 
         //pour get la text bleu et souligné
@@ -102,16 +102,16 @@ public class MainActivity extends AppCompatActivity {
         String point = "";
         String credit = "";
         try {
-            isConnected = Boolean.parseBoolean(login.get("http://192.168.50.54:8100/isConnected",""));
+            isConnected = Boolean.parseBoolean(login.get("http://10.0.2.2:8100/isConnected",""));
 
 
-            username = login.get("http://192.168.50.54:8100/getUsername","");
-            avatar = login.get("http://192.168.50.54:8100/getAvatar","");
-            fullname = login.get("http://192.168.50.54:8100/getFullname","");
-            role = login.get("http://192.168.50.54:8100/getRole","");
-            ceinture = login.get("http://192.168.50.54:8100/getCeinture","");
-            point = login.get("http://192.168.50.54:8100/getPoint/" + username,"");
-            credit = login.get("http://192.168.50.54:8100/getCredit/" + username,"");
+            username = login.get("http://10.0.2.2:8100/getUsername","");
+            avatar = login.get("http://10.0.2.2:8100/getAvatar","");
+            fullname = login.get("http://10.0.2.2:8100/getFullname","");
+            role = login.get("http://10.0.2.2:8100/getRole","");
+            ceinture = login.get("http://10.0.2.2:8100/getCeinture","");
+            point = login.get("http://10.0.2.2:8100/getPoint/" + username,"");
+            credit = login.get("http://10.0.2.2:8100/getCredit/" + username,"");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
         tvPoint.setText(point);
 
         StompClient mStompClient;
-        mStompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, "ws://192.168.50.54:8100/webSocket/websocket");
+        mStompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, "ws://10.0.2.2:8100/webSocket/websocket");
         mStompClient.connect();
 
 
@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
                 tvDate.setText(now.toString().replace("T"," "));
 
                 String de = (new JSONObject(topicMessage.getPayload()).get("de")).toString();
-                String strAvatarMessage = login.get("http://192.168.50.54:8100/getAvatarById/" + de,"");
+                String strAvatarMessage = login.get("http://10.0.2.2:8100/getAvatarById/" + de,"");
                 strAvatarMessage = strAvatarMessage.replace("data:image/jpeg;base64,","");
                 strAvatarMessage = strAvatarMessage.replace("data:image/png;base64,","");
                 byte[] decodedString1 = Base64.decode(strAvatarMessage, Base64.DEFAULT);
@@ -200,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
             tvDate.setText(now.format(dtf));
 
             String de = (new JSONObject(topicMessage.getPayload()).get("de")).toString();
-            String strAvatarMessage = login.get("http://192.168.50.54:8100/getAvatarById/" + de,"");
+            String strAvatarMessage = login.get("http://10.0.2.2:8100/getAvatarById/" + de,"");
             strAvatarMessage = strAvatarMessage.replace("data:image/jpeg;base64,","");
             strAvatarMessage = strAvatarMessage.replace("data:image/png;base64,","");
             byte[] decodedString1 = Base64.decode(strAvatarMessage, Base64.DEFAULT);
@@ -225,9 +225,9 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         try {
-                            String point1 = login.get("http://192.168.50.54:8100/getPoint/" + finalUsername,"");
-                            String credit1 = login.get("http://192.168.50.54:8100/getCredit/" + finalUsername,"");
-                            String ceinture1 = login.get("http://192.168.50.54:8100/getCeinture","");
+                            String point1 = login.get("http://10.0.2.2:8100/getPoint/" + finalUsername,"");
+                            String credit1 = login.get("http://10.0.2.2:8100/getCredit/" + finalUsername,"");
+                            String ceinture1 = login.get("http://10.0.2.2:8100/getCeinture","");
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -258,14 +258,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickKumite(View v) throws IOException {
-        String response = login.get("http://192.168.50.54:8100/kumite","");
+        String response = login.get("http://10.0.2.2:8100/kumite","");
         if(response.equals("Unauthorized")){
             Toast.makeText(this.getApplicationContext(), "Non authorizé",
                     Toast.LENGTH_LONG).show();
         }else{
             Intent myIntent = new Intent(v.getContext(), Kumite.class);
 
-            String valeur = login.get("http://192.168.50.54:8100/getAvatarById/" + hiddenID.getText().toString(),"");
+            String valeur = login.get("http://10.0.2.2:8100/getAvatarById/" + hiddenID.getText().toString(),"");
             myIntent.putExtra("valeur",valeur);
             myIntent.putExtra("idCompte",hiddenID.getText().toString());
             myIntent.putExtra("ceinture",tvCeinture.getText().toString());
@@ -275,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickGrades(View v) throws IOException {
-        String response = login.get("http://192.168.50.54:8100/passageDeGrades","");
+        String response = login.get("http://10.0.2.2:8100/passageDeGrades","");
         if(response.equals("Unauthorized")){
             Toast.makeText(this.getApplicationContext(), "Non authorizé",
                     Toast.LENGTH_LONG).show();
