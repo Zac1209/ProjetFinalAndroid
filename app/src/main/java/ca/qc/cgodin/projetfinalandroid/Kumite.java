@@ -341,7 +341,7 @@ public class Kumite extends AppCompatActivity {
         });
 
         mStompClient.topic("/sujet/resultatCombat").subscribe(topicMessage -> {
-            String avatar;
+            String avatar = "";
             String position;
             String result;
             try{
@@ -349,7 +349,7 @@ public class Kumite extends AppCompatActivity {
                 position = (new JSONObject(topicMessage.getPayload()).get("position")).toString();
                 result = (new JSONObject(topicMessage.getPayload()).get("result")).toString();
             }catch(Exception e){
-                avatar = "";
+                //avatar = "";
                 position = "";
                 result = "";
             }
